@@ -70,14 +70,14 @@ using Microsoft.JSInterop;
 #nullable disable
 #nullable restore
 #line 9 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\_Imports.razor"
-using Template;
+using MemoryGame;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
 #line 10 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\_Imports.razor"
-using Template.Shared;
+using MemoryGame.Shared;
 
 #line default
 #line hidden
