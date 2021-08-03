@@ -90,6 +90,25 @@ using MemoryGame.Shared;
         {
         }
         #pragma warning restore 1998
+#nullable restore
+#line 152 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
+       
+    private string style { get; set; }
+    private string style2 { get; set; }
+    private string style3 { get; set; }
+    private int difficulty { get; set; }
+
+    private async Task test() {
+        difficulty = 1;
+        style = "z-index:4;"; style3 = "";
+        await Task.Delay(900);
+        style2 = "visibility:hidden;";
+    }
+
+
+#line default
+#line hidden
+#nullable disable
     }
 }
 #pragma warning restore 1591

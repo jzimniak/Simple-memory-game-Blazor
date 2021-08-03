@@ -5,12 +5,84 @@
     background-color: #90be9f;
     border: 1px solid #878787;
     aspect-ratio: 1/1;
+    transition: width 1s ease;
+    z-index:2;
+}
+.settings-menu[b-l4g5sfkfl7] {
+    width: 20%;
+    aspect-ratio: 1/1;
+    position: absolute;
+    align-items: end;
+    visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+}
+.settings-anim[b-l4g5sfkfl7] {
+    aspect-ratio: 1/1;
+    width: 0;
+    background-color: #90be9f;
+    transition: width 1s ease;
+    border-radius: 2rem;
+    box-shadow: 0 0 19px -10px black;
+    border: 1px solid #878787;
+}
+.radio[b-l4g5sfkfl7] {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    width: 200px;
+}
+.icon-size-diff[b-l4g5sfkfl7] {
+    font-size: 3rem;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function:linear;
+}
+.radio_radio[b-l4g5sfkfl7] {
+    width: 200px;
+    border: 2px solid #878787;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+.font-size-diff[b-l4g5sfkfl7]{
+    font-size:2rem;
+}
+.bcg-red[b-l4g5sfkfl7] {
+    background-color: #f46666;
+}
+.bcg-green[b-l4g5sfkfl7] {
+    background-color: #64c367;
+}
+.bcg-orange[b-l4g5sfkfl7] {
+    background-color: #fab855;
 }
 
+.radio__input[b-l4g5sfkfl7] {
+    display: none;
+}
 
+    .radio__input:checked + .radio_radio[b-l4g5sfkfl7] {
+        box-shadow: inset 0 0 10px 0px black;
+    }
+        .radio__input:checked + .radio_radio .icon-size-diff[b-l4g5sfkfl7] {
+            animation-name: rotate-b-l4g5sfkfl7;
+        }
+@keyframes rotate-b-l4g5sfkfl7{
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
 
-@media screen and (max-width:425px) {
-    .start-menu[b-l4g5sfkfl7] {
+    @media screen and (max-width:425px) {
+        .start-menu[b-l4g5sfkfl7] {
+        width: 90%;
+    }
+    .settings-menu[b-l4g5sfkfl7] {
         width: 90%;
     }
     .font-size-play[b-l4g5sfkfl7]{
@@ -22,10 +94,21 @@
     .font-size-icon-sett[b-l4g5sfkfl7]{
         font-size:2rem;
     }
+    .font-size-diff[b-l4g5sfkfl7] {
+        font-size: 1.75rem;
+    }
+        .icon-size-diff[b-l4g5sfkfl7] {
+            
+            font-size: 1.8rem;
+        }
+        
 }
 
 @media screen and (min-width:425px) {
     .start-menu[b-l4g5sfkfl7] {
+        width: 70%;
+    }
+    .settings-menu[b-l4g5sfkfl7] {
         width: 70%;
     }
     .font-size-play[b-l4g5sfkfl7] {
@@ -37,10 +120,19 @@
     .font-size-icon-sett[b-l4g5sfkfl7] {
         font-size: 2rem;
     }
+    .font-size-diff[b-l4g5sfkfl7] {
+        font-size: 2rem;
+    }
+    .icon-size-diff[b-l4g5sfkfl7] {
+        font-size: 3rem;
+    }
 }
 
 @media screen and (min-width: 768px) {
     .start-menu[b-l4g5sfkfl7] {
+        width: 60%;
+    }
+    .settings-menu[b-l4g5sfkfl7] {
         width: 60%;
     }
     .font-size-play[b-l4g5sfkfl7] {
@@ -52,42 +144,65 @@
     .font-size-icon-sett[b-l4g5sfkfl7] {
         font-size: 2.7rem;
     }
+    .font-size-diff[b-l4g5sfkfl7] {
+        font-size: 2rem;
+    }
+    .icon-size-diff[b-l4g5sfkfl7] {
+        font-size: 3rem;
+    }
 }
 
 @media screen and (min-width: 885px) {
     .start-menu[b-l4g5sfkfl7] {
         width: 60%;
     }
-
+    .settings-menu[b-l4g5sfkfl7] {
+        width: 60%;
+    }
     .font-size-play[b-l4g5sfkfl7] {
         font-size: 6rem;
     }
-
     .font-size-settings[b-l4g5sfkfl7] {
         font-size: 2rem;
     }
     .font-size-icon-sett[b-l4g5sfkfl7] {
         font-size: 2rem;
+    }
+    .font-size-diff[b-l4g5sfkfl7] {
+        font-size: 2rem;
+    }
+    .icon-size-diff[b-l4g5sfkfl7] {
+        font-size: 3rem;
     }
 }
 @media (min-width: 992px) {
     .start-menu[b-l4g5sfkfl7] {
         width: 50%;
     }
-
+    .settings-menu[b-l4g5sfkfl7] {
+        width: 50%;
+    }
     .font-size-play[b-l4g5sfkfl7] {
         font-size: 6rem;
     }
-
     .font-size-settings[b-l4g5sfkfl7] {
         font-size: 2rem;
     }
     .font-size-icon-sett[b-l4g5sfkfl7] {
         font-size: 3.3rem;
     }
+    .font-size-diff[b-l4g5sfkfl7] {
+        font-size: 2.6rem;
+    }
+    .icon-size-diff[b-l4g5sfkfl7] {
+        font-size: 3rem;
+    }
 }
 @media (min-width: 1200px) {
     .start-menu[b-l4g5sfkfl7] {
+        width: 25%;
+    }
+    .settings-menu[b-l4g5sfkfl7] {
         width: 25%;
     }
     .font-size-play[b-l4g5sfkfl7] {
@@ -98,5 +213,11 @@
     }
     .font-size-icon-sett[b-l4g5sfkfl7] {
         font-size: 2rem;
+    }
+    .font-size-diff[b-l4g5sfkfl7] {
+        font-size: 2rem;
+    }
+    .icon-size-diff[b-l4g5sfkfl7] {
+        font-size: 3rem;
     }
 }
