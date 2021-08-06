@@ -82,6 +82,20 @@ using MemoryGame.Shared;
 #line default
 #line hidden
 #nullable disable
+#nullable restore
+#line 11 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\_Imports.razor"
+using MemoryGame.Component;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 2 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
+using Microsoft.AspNetCore.Hosting;
+
+#line default
+#line hidden
+#nullable disable
     [Microsoft.AspNetCore.Components.RouteAttribute("/")]
     public partial class HomePage : Microsoft.AspNetCore.Components.ComponentBase
     {
@@ -91,24 +105,52 @@ using MemoryGame.Shared;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 152 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
+#line 170 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
        
     private string style { get; set; }
+    private int amount = 6;
     private string style2 { get; set; }
     private string style3 { get; set; }
     private int difficulty { get; set; }
+    private string[,] names { get; set; }
 
-    private async Task test() {
+    private bool isMenuClosed { get; set; }
+
+    private async Task test()
+    {
         difficulty = 1;
         style = "z-index:4;"; style3 = "";
         await Task.Delay(900);
         style2 = "visibility:hidden;";
     }
 
+    private void createNames()
+    {
+
+        names = new string[amount, amount];
+        var rnd = new Random();
+        var randomNumbers = Enumerable.Range(0, amount * amount).Select(x => x).Concat(Enumerable.Range(0, amount * amount).Select(x => x)).OrderBy(x => rnd.Next()).Take(amount * amount * 2).ToList();
+
+        int index = 0;
+
+
+        for (int i = 0; i < amount; i++)
+        {
+            for (int j = 0; j < amount; j++)
+            {
+                names[i, j] =env.WebRootPath+"\\icons\\"+ randomNumbers[index]+".svg";
+                index++;
+            }
+        }
+
+        isMenuClosed = true;
+    }
+
 
 #line default
 #line hidden
 #nullable disable
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private IWebHostEnvironment env { get; set; }
     }
 }
 #pragma warning restore 1591

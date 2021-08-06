@@ -48,3 +48,6 @@ C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\obj\Debu
 C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\obj\Debug\net5.0\RazorDeclaration\Pages\HomePage.razor.g.cs
 C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\obj\Debug\net5.0\Razor\Pages\HomePage.razor.g.cs
 C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\obj\Debug\net5.0\scopedcss\Pages\HomePage.razor.rz.scp.css
+C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\obj\Debug\net5.0\RazorDeclaration\Component\GameComponent.razor.g.cs
+C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\obj\Debug\net5.0\Razor\Component\GameComponent.razor.g.cs
+C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\obj\Debug\net5.0\scopedcss\Component\GameComponent.razor.rz.scp.css

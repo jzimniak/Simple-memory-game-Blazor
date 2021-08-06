@@ -1,0 +1,95 @@
+﻿.game {
+    flex-direction:column;
+    align-items:center;
+    display:flex;
+    height:100%;
+}
+.timer {
+    display: flex;
+    width: 100%;
+}
+.front {
+    position: absolute;
+    height: 93%;
+    background-color: cadetblue;
+    border-radius: 1rem;
+    backface-visibility: hidden;
+    transition: transform 500ms ease;
+}
+.back {
+    position:absolute;
+    height: 93%;
+    background-color: blue;
+    border-radius: 1rem;
+    transition: transform 500ms ease;
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+
+}
+
+
+@media screen and (max-width:425px) {
+    .game {
+        width: 90%;
+    }
+
+    .timer {
+        aspect-ratio: 1.5/1;
+    }
+
+    .top-menu-game {
+        aspect-ratio: 5/1;
+        width:90%;
+    }
+}
+@media screen and (min-width:425px) {
+    .game {
+        width: 85%;
+    }
+    .timer {
+        aspect-ratio: 5/1;
+    }
+    .top-menu-game {
+        aspect-ratio: 6/1;
+        width: 85%;
+    }
+}
+@media screen and (min-width: 768px) {
+    .game {
+        width: 80%;
+    }
+    .timer {
+        aspect-ratio: 4/1;
+    }
+    .top-menu-game {
+        aspect-ratio: 6/1;
+        width: 80%;
+    }
+}
+
+@media (min-width: 992px) {
+    .game {
+        width: 80%;
+    }
+    .timer {
+        aspect-ratio: 3/1;
+    }
+    .top-menu-game {
+        aspect-ratio: 7/1;
+        width: 80%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .game {
+        width: 40%;
+    }
+    .timer {
+        aspect-ratio: 7/1;
+    }
+    .top-menu-game {
+        aspect-ratio: 10/1;
+        width: 40%;
+    }
+}
+

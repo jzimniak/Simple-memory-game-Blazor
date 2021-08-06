@@ -4,7 +4,7 @@
 #pragma warning disable 0649
 #pragma warning disable 0169
 
-namespace MemoryGame
+namespace MemoryGame.Component
 {
     #line hidden
     using System;
@@ -89,13 +89,84 @@ using MemoryGame.Component;
 #line default
 #line hidden
 #nullable disable
-    public partial class App : Microsoft.AspNetCore.Components.ComponentBase
+#nullable restore
+#line 1 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+using System.Globalization;
+
+#line default
+#line hidden
+#nullable disable
+    public partial class GameComponent : Microsoft.AspNetCore.Components.ComponentBase
     {
         #pragma warning disable 1998
         protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder __builder)
         {
         }
         #pragma warning restore 1998
+#nullable restore
+#line 59 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+       
+
+    private int amount { get; set; }
+    private bool[,] flipped { get; set; }
+    private int[,] flippedindex { get; set; }
+    private bool isfunctionrunning { get; set; }
+    [Parameter]
+    public string[,] names { get; set; }
+
+    protected override void OnInitialized()
+    {
+        flippedindex = new int[2,2];
+        flippedindex[0, 0] = -1;
+        flippedindex[0, 1] = -1;
+        flippedindex[1, 0] = -1;
+        flippedindex[1, 1] = -1;
+        amount = 2;
+        flipped = new bool[amount, amount];
+    }
+    private async Task flip(string index,int i , int j)
+    {
+        if (!isfunctionrunning)
+        {
+            isfunctionrunning = true;
+            if (!flipped[i, j])
+            {
+                if (flippedindex[0, 0] == -1)
+                {
+                    await JsRuntime.InvokeAsync<string>("flip", index);
+                    flipped[i, j] = true;
+                    flippedindex[0, 0] = i;
+                    flippedindex[0, 1] = j;
+                }
+                else
+                {
+                    await JsRuntime.InvokeAsync<string>("flip", index);
+                    System.Threading.Thread.Sleep(500);
+                    flipped[i, j] = true;
+                    flippedindex[1, 0] = i;
+                    flippedindex[1, 1] = j;
+                    if (names[flippedindex[0, 0], flippedindex[0, 1]]!=names[i,j])
+                    {
+                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[0, 0].ToString() + flippedindex[0, 1].ToString());
+                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[1, 0].ToString() + flippedindex[1, 1].ToString());
+                        flipped[i, j] = false;
+                        flipped[flippedindex[0, 0], flippedindex[0, 1]] = false;
+                    }
+
+                    flippedindex[0, 0] = -1;
+                    flippedindex[0, 1] = -1;
+                    flippedindex[1, 0] = -1;
+                    flippedindex[1, 1] = -1;
+                }
+            }
+            isfunctionrunning = false;
+        }
+    }
+
+#line default
+#line hidden
+#nullable disable
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private IJSRuntime JsRuntime { get; set; }
     }
 }
 #pragma warning restore 1591

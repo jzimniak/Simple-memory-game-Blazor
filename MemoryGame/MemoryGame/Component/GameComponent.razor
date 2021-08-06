@@ -1,0 +1,116 @@
+﻿@using System.Globalization
+
+@inject IJSRuntime JsRuntime;
+
+<div class="game">
+    <div style="width:100vw; background-color:aqua;" class="d-flex justify-content-center">
+        <div class="top-menu-game d-flex flex-row">
+            <div class="h-100 d-flex justify-content-center align-items-center" style="width:60%">
+                Best Time:
+            </div>
+            <div class="h-100 d-flex justify-content-center align-items-center" style="width:20%">
+                <button>
+                    <i class="fas fa-redo-alt"></i>
+                </button>
+            </div>
+            <div class="h-100 d-flex justify-content-center align-items-center" style="width:20%">
+                <button>
+                    <i class="fas fa-cog font-size-icon-sett"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div style="display:flex;flex-direction:column;height:100%;width:100%;justify-content:center;">
+        <div class="timer d-flex justify-content-center align-items-center">
+            <span style="font-family: cursive; font-size: 3rem;">
+                TIMER
+            </span>
+        </div>
+        <div style="display: flex; width: 100%; aspect-ratio: 1/1; flex-direction:column">
+            @for (int i = 0; i < amount; i++)
+            {
+                var percentage = ((decimal)100 / amount).ToString(CultureInfo.InvariantCulture);
+                <div class="d-flex w-100 position-relative" style="height:@percentage%">
+                    @for (int j = 0; j < amount; j++)
+                    {
+                        var iT = i;
+                        var jT = j;
+                        var x = i.ToString() + j.ToString();
+                        var idf = "front" + x;
+                        var idb = "back" + x;
+                        <div class="d-flex h-100 justify-content-center align-items-center t" style="width:@percentage%; perspective:1000px">
+                            <div id="@idf" class="front" style="width: 93%;" @onclick='(() => flip(x,iT,jT))'>
+                            </div>
+                            <div id="@idb" class="back d-flex justify-content-center align-items-center" style="width: 93%;">
+                                <span style="color:white;font-size:3rem;">
+                                    @names[i, j]
+                                </span>                         
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+
+@code {
+
+    private int amount { get; set; }
+    private bool[,] flipped { get; set; }
+    private int[,] flippedindex { get; set; }
+    private bool isfunctionrunning { get; set; }
+    [Parameter]
+    public string[,] names { get; set; }
+
+    protected override void OnInitialized()
+    {
+        flippedindex = new int[2,2];
+        flippedindex[0, 0] = -1;
+        flippedindex[0, 1] = -1;
+        flippedindex[1, 0] = -1;
+        flippedindex[1, 1] = -1;
+        amount = 2;
+        flipped = new bool[amount, amount];
+    }
+    private async Task flip(string index,int i , int j)
+    {
+        if (!isfunctionrunning)
+        {
+            isfunctionrunning = true;
+            if (!flipped[i, j])
+            {
+                if (flippedindex[0, 0] == -1)
+                {
+                    await JsRuntime.InvokeAsync<string>("flip", index);
+                    flipped[i, j] = true;
+                    flippedindex[0, 0] = i;
+                    flippedindex[0, 1] = j;
+                }
+                else
+                {
+                    await JsRuntime.InvokeAsync<string>("flip", index);
+                    System.Threading.Thread.Sleep(500);
+                    flipped[i, j] = true;
+                    flippedindex[1, 0] = i;
+                    flippedindex[1, 1] = j;
+                    if (names[flippedindex[0, 0], flippedindex[0, 1]]!=names[i,j])
+                    {
+                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[0, 0].ToString() + flippedindex[0, 1].ToString());
+                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[1, 0].ToString() + flippedindex[1, 1].ToString());
+                        flipped[i, j] = false;
+                        flipped[flippedindex[0, 0], flippedindex[0, 1]] = false;
+                    }
+
+                    flippedindex[0, 0] = -1;
+                    flippedindex[0, 1] = -1;
+                    flippedindex[1, 0] = -1;
+                    flippedindex[1, 1] = -1;
+                }
+            }
+            isfunctionrunning = false;
+        }
+    }
+}

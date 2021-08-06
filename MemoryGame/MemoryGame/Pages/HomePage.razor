@@ -1,165 +1,210 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Hosting
 
-<div class="row start-menu" style="@style">
-    <div class="col-12 h-100 p-0">
-        <div class="d-flex justify-content-center align-items-end" style="height:55%;">
-            <button style="width: 50%; border-radius: 50%; outline: none; aspect-ratio: 1/1; background-color: #a9e4ae; border: 1px solid #676767; box-shadow: 0 0 14px -8px black; ">
-                <i class="fas fa-play font-size-play" style="color: white; overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; max-height: 100%;" ></i>
-            </button>
+@inject IWebHostEnvironment env
+@if (isMenuClosed)
+{
+    <GameComponent names="@names" />
+}
+else
+{
+
+    <div class="row start-menu" style="@style">
+        <div class="col-12 h-100 p-0">
+            <div class="d-flex justify-content-center align-items-end" style="height:55%;">
+                <button @onclick="(() => createNames())" style="width: 50%; border-radius: 50%; outline: none; aspect-ratio: 1/1; background-color: #a9e4ae; border: 1px solid #676767; box-shadow: 0 0 14px -8px black; ">
+                    <i class="fas fa-play font-size-play" style="color: white; overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; max-height: 100%;"></i>
+                </button>
+            </div>
+            <div class="d-flex justify-content-center align-items-center" style="height:45%;">
+                <button @onclick='(()=> { style = "width:0;";style3 = "width:100%";  style2 = "visibility:visible;"; })' class="d-flex align-items-center" style="width: 75%; height: 40%; border-radius: 1rem; border: none; outline: none; background-color: #a9e4ae; border: 1px solid #676767; box-shadow: 0 0 14px -8px black; ">
+                    <div style="width:20%;" class="d-flex justify-content-end">
+                        <i class="fas fa-cog font-size-icon-sett" style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; max-height: 100%;"></i>
+                    </div>
+                    <div style="width: 80%; font-family: cursive;" class="font-size-settings">
+                        <span style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+                            SETTINGS
+                        </span>
+                    </div>
+                </button>
+            </div>
         </div>
-        <div class="d-flex justify-content-center align-items-center" style="height:45%;">
-            <button @onclick='(()=> { style = "width:0;";style3 = "width:100%";  style2 = "visibility:visible;"; })' class="d-flex align-items-center" style="width: 75%; height: 40%; border-radius: 1rem; border: none; outline: none; background-color: #a9e4ae; border: 1px solid #676767; box-shadow: 0 0 14px -8px black; ">
-                <div style="width:20%;" class="d-flex justify-content-end">
-                    <i class="fas fa-cog font-size-icon-sett" style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; max-height: 100%;"></i>
-                </div>
-                <div style="width: 80%; font-family: cursive;" class="font-size-settings">
-                    <span style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+    </div>
+    <div class="settings-menu" style="@style2">
+        <div class="settings-anim" style="@style3">
+            <div class="d-flex w-100 justify-content-center" style="border-radius: 2rem 2rem 0 0; height: 12%; background-color: #597454; color: white;">
+                <div class="d-flex justify-content-center align-items-center font-size-settings text-center" style="width:85%;">
+                    <span style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; font-family: cursive; margin-left: calc(((100%*100)/75)*0.125);">
                         SETTINGS
                     </span>
                 </div>
-            </button>
+                <button @onclick='(()=> {test();})' class="h-100" style="width: 15%; background-color: #f16a6a; border-radius: 0rem 2rem 0 0; border: none; outline: none;color:white;">
+                    <i class="fas fa-times" style="font-size:1.5rem;"></i>
+                </button>
+            </div>
+            <div class="d-flex justify-content-center align-items-center flex-column" style="height:88%;">
+                <div style="height:15%;" class="d-flex justify-content-center align-items-center w-100">
+                    <EditForm Model="amount">
+                        <InputSelect @bind-Value="amount">
+                            <option value="2">2x2</option>
+                            <option value="4">4x4</option>
+                            <option value="6">6x6</option>
+                            <option value="8">8x8</option>
+                        </InputSelect>
+                    </EditForm>
+                </div>
+                <div style="height:70%;" class="d-flex justify-content-center w-100">
+                    <EditForm Model="difficulty" style="width:80%">
+                        <div class="form-check w-100 p-0" style="height: 33%;">
+                            <label class="radio w-100 m-0" for="test1" style="height:90%;">
+                                <input type="radio" class="radio__input" id="test1" name="exampleRadios" />
+                                <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-green">
+                                    <div class="d-flex w-100 flex-column" style="height:90%;">
+                                        <div class="d-flex w-100" style="height:80%">
+                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                                <i class="fas fa-smile icon-size-diff"></i>
+                                            </div>
+                                            <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
+                                                <span class="font-size-diff">
+                                                    EASY
+                                                </span>
+                                            </div>
+                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                                <i class="fas fa-smile  icon-size-diff"></i>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex w-100" style="height:20%">
+                                            <div style="width:20%;">
+
+                                            </div>
+                                            <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
+                                                <span>
+                                                    No pressure, just play :)
+                                                </span>
+                                            </div>
+                                            <div style="width:20%;">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check w-100 p-0" style="height:33%;">
+                            <label class="radio w-100 m-0" for="test2" style="height:90%;">
+                                <input type="radio" class="radio__input" id="test2" name="exampleRadios" checked />
+                                <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-orange">
+                                    <div class="d-flex w-100 flex-column" style="height:90%;">
+                                        <div class="d-flex w-100" style="height:80%">
+                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                                <i class="fas fa-stopwatch icon-size-diff" style="transform-origin: 50% 59%;"></i>
+                                            </div>
+                                            <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
+                                                <span class="font-size-diff">
+                                                    NORMAL
+                                                </span>
+                                            </div>
+                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                                <i class="fas fa-stopwatch icon-size-diff" style="transform-origin: 50% 59%;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex w-100" style="height:20%">
+                                            <div style="width:20%;">
+
+                                            </div>
+                                            <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
+                                                <span>
+                                                    Time Limit
+                                                </span>
+                                            </div>
+                                            <div style="width:20%;">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-check w-100 p-0" style="height: 33%;">
+                            <label class="radio w-100 m-0" for="test3" style="height:90%;">
+                                <input type="radio" class="radio__input" id="test3" name="exampleRadios" />
+                                <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-red">
+                                    <div class="d-flex w-100 flex-column" style="height:90%;">
+                                        <div class="d-flex w-100" style="height:80%">
+                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                                <i class="fas fa-bomb icon-size-diff" style="transform-origin: 39.5% 58.3%;"></i>
+                                            </div>
+                                            <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
+                                                <span class="font-size-diff">
+                                                    HARD
+                                                </span>
+                                            </div>
+                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                                <i class="fas fa-bomb icon-size-diff" style="transform-origin: 39.5% 58.3%;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex w-100" style="height:20%">
+                                            <div style="width:20%;">
+
+                                            </div>
+                                            <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
+                                                <span>
+                                                    After mistake, reset elements
+                                                </span>
+                                            </div>
+                                            <div style="width:20%;">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<div class="settings-menu" style="@style2">
-    <div class="settings-anim" style="@style3">
-        <div class="d-flex w-100 justify-content-center" style="border-radius: 2rem 2rem 0 0; height: 12%; background-color: #597454; color: white;">
-            <div class="d-flex justify-content-center align-items-center font-size-settings text-center" style="width:85%;">
-                <span style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; font-family: cursive; margin-left: calc(((100%*100)/75)*0.125);">
-                    SETTINGS
-                </span>
-            </div>
-            <button @onclick='(()=> {test();})' class="h-100" style="width: 15%; background-color: #f16a6a; border-radius: 0rem 2rem 0 0; border: none; outline: none;color:white;">
-                <i class="fas fa-times" style="font-size:1.5rem;"></i>
-            </button>
-        </div>
-        <div class="d-flex justify-content-center align-items-center" style="height:88%;">
+}
 
-            <div style="height:70%;" class="d-flex justify-content-center w-100">
-                <EditForm Model="difficulty" style="width:80%">
-                    <div class="form-check w-100 p-0" style="height: 33%;">
-                        <label class="radio w-100 m-0" for="test1" style="height:90%;">
-                            <input type="radio" class="radio__input" id="test1" name="exampleRadios" />
-                            <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-green">
-                                <div class="d-flex w-100 flex-column" style="height:90%;">
-                                    <div class="d-flex w-100" style="height:80%">
-                                        <div style="width:20%;" class="d-flex justify-content-center align-items-center">
-                                            <i class="fas fa-smile icon-size-diff"></i>
-                                        </div>
-                                        <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
-                                            <span class="font-size-diff">
-                                                EASY
-                                            </span>
-                                        </div>
-                                        <div style="width:20%;" class="d-flex justify-content-center align-items-center">
-                                            <i class="fas fa-smile  icon-size-diff"></i>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex w-100" style="height:20%">
-                                        <div style="width:20%;">
-
-                                        </div>
-                                        <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
-                                            <span>
-                                                No pressure, just play :)
-                                            </span>
-                                        </div>
-                                        <div style="width:20%;">
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="form-check w-100 p-0" style="height:33%;">
-                        <label class="radio w-100 m-0" for="test2" style="height:90%;">
-                            <input type="radio" class="radio__input" id="test2" name="exampleRadios" checked />
-                            <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-orange">
-                                <div class="d-flex w-100 flex-column" style="height:90%;">
-                                    <div class="d-flex w-100" style="height:80%">
-                                        <div style="width:20%;" class="d-flex justify-content-center align-items-center">
-                                            <i class="fas fa-stopwatch icon-size-diff" style="transform-origin: 50% 59%;"></i>
-                                        </div>
-                                        <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
-                                            <span class="font-size-diff">
-                                                NORMAL
-                                            </span>
-                                        </div>
-                                        <div style="width:20%;" class="d-flex justify-content-center align-items-center">
-                                            <i class="fas fa-stopwatch icon-size-diff" style="transform-origin: 50% 59%;"></i>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex w-100" style="height:20%">
-                                        <div style="width:20%;">
-
-                                        </div>
-                                        <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
-                                            <span>
-                                                Time Limit
-                                            </span>
-                                        </div>
-                                        <div style="width:20%;">
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="form-check w-100 p-0" style="height: 33%;">
-                        <label class="radio w-100 m-0" for="test3" style="height:90%;">
-                            <input type="radio" class="radio__input" id="test3" name="exampleRadios" />
-                            <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-red">
-                                <div class="d-flex w-100 flex-column" style="height:90%;">
-                                    <div class="d-flex w-100" style="height:80%">
-                                        <div style="width:20%;" class="d-flex justify-content-center align-items-center">
-                                            <i class="fas fa-bomb icon-size-diff" style="transform-origin: 39.5% 58.3%;"></i>
-                                        </div>
-                                        <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
-                                            <span class="font-size-diff">
-                                                HARD
-                                            </span>
-                                        </div>
-                                        <div style="width:20%;" class="d-flex justify-content-center align-items-center">
-                                            <i class="fas fa-bomb icon-size-diff" style="transform-origin: 39.5% 58.3%;"></i>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex w-100" style="height:20%">
-                                        <div style="width:20%;">
-
-                                        </div>
-                                        <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
-                                            <span>
-                                                After mistake, reset elements
-                                            </span>
-                                        </div>
-                                        <div style="width:20%;">
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                </EditForm>
-            </div>
-        
-           
-        </div>
-    </div>
-</div>
 @code {
     private string style { get; set; }
+    private int amount = 6;
     private string style2 { get; set; }
     private string style3 { get; set; }
     private int difficulty { get; set; }
+    private string[,] names { get; set; }
 
-    private async Task test() {
+    private bool isMenuClosed { get; set; }
+
+    private async Task test()
+    {
         difficulty = 1;
         style = "z-index:4;"; style3 = "";
         await Task.Delay(900);
         style2 = "visibility:hidden;";
+    }
+
+    private void createNames()
+    {
+
+        names = new string[amount, amount];
+        var rnd = new Random();
+        var randomNumbers = Enumerable.Range(0, amount * amount).Select(x => x).Concat(Enumerable.Range(0, amount * amount).Select(x => x)).OrderBy(x => rnd.Next()).Take(amount * amount * 2).ToList();
+
+        int index = 0;
+
+
+        for (int i = 0; i < amount; i++)
+        {
+            for (int j = 0; j < amount; j++)
+            {
+                names[i, j] =env.WebRootPath+"\\icons\\"+ randomNumbers[index]+".svg";
+                index++;
+            }
+        }
+
+        isMenuClosed = true;
     }
 
 }

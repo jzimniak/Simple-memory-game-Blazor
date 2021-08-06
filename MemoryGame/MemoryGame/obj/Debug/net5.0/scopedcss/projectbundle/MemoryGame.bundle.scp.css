@@ -1,5 +1,101 @@
 @import '';
 
+/* _content/MemoryGame/Component/GameComponent.razor.rz.scp.css */
+.game[b-zv4ssyz2yc] {
+    flex-direction:column;
+    align-items:center;
+    display:flex;
+    height:100%;
+}
+.timer[b-zv4ssyz2yc] {
+    display: flex;
+    width: 100%;
+}
+.front[b-zv4ssyz2yc] {
+    position: absolute;
+    height: 93%;
+    background-color: cadetblue;
+    border-radius: 1rem;
+    backface-visibility: hidden;
+    transition: transform 500ms ease;
+}
+.back[b-zv4ssyz2yc] {
+    position:absolute;
+    height: 93%;
+    background-color: blue;
+    border-radius: 1rem;
+    transition: transform 500ms ease;
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+
+}
+
+
+@media screen and (max-width:425px) {
+    .game[b-zv4ssyz2yc] {
+        width: 90%;
+    }
+
+    .timer[b-zv4ssyz2yc] {
+        aspect-ratio: 1.5/1;
+    }
+
+    .top-menu-game[b-zv4ssyz2yc] {
+        aspect-ratio: 5/1;
+        width:90%;
+    }
+}
+@media screen and (min-width:425px) {
+    .game[b-zv4ssyz2yc] {
+        width: 85%;
+    }
+    .timer[b-zv4ssyz2yc] {
+        aspect-ratio: 5/1;
+    }
+    .top-menu-game[b-zv4ssyz2yc] {
+        aspect-ratio: 6/1;
+        width: 85%;
+    }
+}
+@media screen and (min-width: 768px) {
+    .game[b-zv4ssyz2yc] {
+        width: 80%;
+    }
+    .timer[b-zv4ssyz2yc] {
+        aspect-ratio: 4/1;
+    }
+    .top-menu-game[b-zv4ssyz2yc] {
+        aspect-ratio: 6/1;
+        width: 80%;
+    }
+}
+
+@media (min-width: 992px) {
+    .game[b-zv4ssyz2yc] {
+        width: 80%;
+    }
+    .timer[b-zv4ssyz2yc] {
+        aspect-ratio: 3/1;
+    }
+    .top-menu-game[b-zv4ssyz2yc] {
+        aspect-ratio: 7/1;
+        width: 80%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .game[b-zv4ssyz2yc] {
+        width: 40%;
+    }
+    .timer[b-zv4ssyz2yc] {
+        aspect-ratio: 7/1;
+    }
+    .top-menu-game[b-zv4ssyz2yc] {
+        aspect-ratio: 10/1;
+        width: 40%;
+    }
+}
+
 /* _content/MemoryGame/Pages/HomePage.razor.rz.scp.css */
 .start-menu[b-l4g5sfkfl7] {
     width: 20%;

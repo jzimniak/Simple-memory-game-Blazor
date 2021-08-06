@@ -16,6 +16,17 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="MemoryGame.styles.css" rel="stylesheet" />
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        function flip(index) {
+            document.getElementById("front" + index).style.cssText += "transform: rotateY(180deg);";
+            document.getElementById("back" + index).style.cssText += "transform: rotateY(0deg);";
+        }
+        function flipback(index) {
+            document.getElementById("front" + index).style.cssText += "transform: rotateY(0deg);";
+            document.getElementById("back" + index).style.cssText += "transform: rotateY(180deg);";
+        }
+    </script>
 </head>
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
