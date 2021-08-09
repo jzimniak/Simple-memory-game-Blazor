@@ -1,50 +1,73 @@
 ﻿@using System.Globalization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 
 @inject IJSRuntime JsRuntime;
+@inject ProtectedLocalStorage BrowserStorage
+@inject Services.Settings settings
+@inject Services.ComponentsService componentsService
 
 <div class="game">
-    <div style="width:100vw; background-color:aqua;" class="d-flex justify-content-center">
+    <div style="width:100vw;" class="d-flex justify-content-center">
         <div class="top-menu-game d-flex flex-row">
-            <div class="h-100 d-flex justify-content-center align-items-center" style="width:60%">
-                Best Time:
+            <div class="h-100 d-flex justify-content-center align-items-center w-60">
+                @if (bestTime is not null)
+                {
+                    <span style="font-size: 2rem;" class="font-cursive">
+                        Personal best time: @bestTime
+                    </span>
+                }
+                else
+                {
+                    <span style="font-size: 1.7rem;" class="font-cursive">
+                        Complete the game to have personal best
+                    </span>
+                }
             </div>
-            <div class="h-100 d-flex justify-content-center align-items-center" style="width:20%">
-                <button>
-                    <i class="fas fa-redo-alt"></i>
+            <div class="h-100 d-flex justify-content-center align-items-center w-20">
+                <button class="w-100 h-100 bg-transparent " style="outline:none;" @onclick="ResetGame">
+                    <i class="fas fa-redo-alt" style=" font-size: 2.5rem;"></i>
                 </button>
             </div>
-            <div class="h-100 d-flex justify-content-center align-items-center" style="width:20%">
-                <button>
-                    <i class="fas fa-cog font-size-icon-sett"></i>
+            <div class="h-100 d-flex justify-content-center align-items-center w-20">
+                <button class="w-100 h-100 bg-transparent" style="outline:none;" @onclick="(() => { componentsService.homePage.OpenMenu(); })">
+                    <i class="fas fa-cog font-size-icon-sett" style=" font-size: 2.5rem;"></i>
                 </button>
             </div>
         </div>
     </div>
-    <div style="display:flex;flex-direction:column;height:100%;width:100%;justify-content:center;">
+    <div class="d-flex flex-column h-100 w-100 justify-content-center">
         <div class="timer d-flex justify-content-center align-items-center">
-            <span style="font-family: cursive; font-size: 3rem;">
-                TIMER
-            </span>
-        </div>
-        <div style="display: flex; width: 100%; aspect-ratio: 1/1; flex-direction:column">
-            @for (int i = 0; i < amount; i++)
+            @if (isGameOver)
             {
-                var percentage = ((decimal)100 / amount).ToString(CultureInfo.InvariantCulture);
+                <span style="font-size: 3rem;color:red;" class="font-cursive">
+                    Game Over!!!
+                </span>
+            }
+            else
+            {
+                <span style="font-size: 3rem;" class="font-cursive">
+                    @ConvertTime(timeSEC)
+                </span>
+            }
+        </div>
+        <div class="d-flex w-100 flex-column" style="aspect-ratio: 1/1;@gameOverStyle">
+            @for (int i = 0; i < settings.amount; i++)
+            {
+                var percentage = ((decimal)100 / settings.amount).ToString(CultureInfo.InvariantCulture);
                 <div class="d-flex w-100 position-relative" style="height:@percentage%">
-                    @for (int j = 0; j < amount; j++)
+                    @for (int j = 0; j < settings.amount; j++)
                     {
-                        var iT = i;
-                        var jT = j;
-                        var x = i.ToString() + j.ToString();
-                        var idf = "front" + x;
-                        var idb = "back" + x;
+                        var iLocal = i;
+                        var jLocal = j;
+                        var index = i.ToString() + j.ToString();
+                        var idFront = "front" + index;
+                        var idBack = "back" + index;
                         <div class="d-flex h-100 justify-content-center align-items-center t" style="width:@percentage%; perspective:1000px">
-                            <div id="@idf" class="front" style="width: 93%;" @onclick='(() => flip(x,iT,jT))'>
+                            <div id="@idFront" class="front" style="width: 93%;" @onclick='(() => FlipCard(index,iLocal,jLocal))'>
                             </div>
-                            <div id="@idb" class="back d-flex justify-content-center align-items-center" style="width: 93%;">
-                                <span style="color:white;font-size:3rem;">
-                                    @names[i, j]
-                                </span>                         
+                            <div id="@idBack" class="back d-flex justify-content-center align-items-center" style="width: 93%;">
+                                @{var path = iconsPathMatrix[i, j]; }
+                                <img src="@path" style="max-height:80%;max-width:80%;" />
                             </div>
                         </div>
                     }
@@ -52,65 +75,378 @@
             }
         </div>
     </div>
-
 </div>
 
 
 @code {
-
-    private int amount { get; set; }
-    private bool[,] flipped { get; set; }
-    private int[,] flippedindex { get; set; }
-    private bool isfunctionrunning { get; set; }
     [Parameter]
-    public string[,] names { get; set; }
+    public string[,] iconsPathMatrix { get; set; }
 
-    protected override void OnInitialized()
+    private bool isGameOver { get; set; }
+    private bool isFlipCardRunning { get; set; }
+
+    private bool[,] flippedCardsMatrix { get; set; }
+    private int[,] flippeCardPairIndex { get; set; }
+
+    private double timeSEC  = 0;
+    private double difficultyTime { get; set; }
+
+    private string bestTime { get; set; }
+    private string gameOverStyle { get; set; }
+
+    private System.Timers.Timer timer { get; set; }
+
+    protected async override Task OnInitializedAsync()
     {
-        flippedindex = new int[2,2];
-        flippedindex[0, 0] = -1;
-        flippedindex[0, 1] = -1;
-        flippedindex[1, 0] = -1;
-        flippedindex[1, 1] = -1;
-        amount = 2;
-        flipped = new bool[amount, amount];
-    }
-    private async Task flip(string index,int i , int j)
-    {
-        if (!isfunctionrunning)
+        componentsService.gameComponent = this;
+        var score = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
+        if (score.Success)
         {
-            isfunctionrunning = true;
-            if (!flipped[i, j])
-            {
-                if (flippedindex[0, 0] == -1)
-                {
-                    await JsRuntime.InvokeAsync<string>("flip", index);
-                    flipped[i, j] = true;
-                    flippedindex[0, 0] = i;
-                    flippedindex[0, 1] = j;
-                }
-                else
-                {
-                    await JsRuntime.InvokeAsync<string>("flip", index);
-                    System.Threading.Thread.Sleep(500);
-                    flipped[i, j] = true;
-                    flippedindex[1, 0] = i;
-                    flippedindex[1, 1] = j;
-                    if (names[flippedindex[0, 0], flippedindex[0, 1]]!=names[i,j])
-                    {
-                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[0, 0].ToString() + flippedindex[0, 1].ToString());
-                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[1, 0].ToString() + flippedindex[1, 1].ToString());
-                        flipped[i, j] = false;
-                        flipped[flippedindex[0, 0], flippedindex[0, 1]] = false;
-                    }
+            bestTime = score.Value;
+        }
 
-                    flippedindex[0, 0] = -1;
-                    flippedindex[0, 1] = -1;
-                    flippedindex[1, 0] = -1;
-                    flippedindex[1, 1] = -1;
+        timer = new System.Timers.Timer(100);
+        switch (settings.difficulty)
+        {
+            case 0:
+                timer.Elapsed += TimeUPEvent;
+                timer.Enabled = true;
+                break;
+            case 1:
+                switch (settings.amount)
+                {
+                    case 2:
+                        timeSEC = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        timeSEC = 40;
+                        difficultyTime = 40;
+                        break;
+                    case 6:
+                        timeSEC = 90;
+                        difficultyTime = 90;
+                        break;
+                    case 8:
+                        timeSEC = 160;
+                        difficultyTime = 160;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            case 2:
+                switch (settings.amount)
+                {
+                    case 2:
+                        timeSEC = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        timeSEC = 80;
+                        difficultyTime = 80;
+                        break;
+                    case 6:
+                        timeSEC = 180;
+                        difficultyTime = 180;
+                        break;
+                    case 8:
+                        timeSEC = 320;
+                        difficultyTime = 320;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            default:
+                break;
+        }
+
+        flippeCardPairIndex = new int[2, 2];
+        flippeCardPairIndex[0, 0] = -1;
+        flippeCardPairIndex[0, 1] = -1;
+        flippeCardPairIndex[1, 0] = -1;
+        flippeCardPairIndex[1, 1] = -1;
+        flippedCardsMatrix = new bool[settings.amount, settings.amount];
+    }
+
+    private string ConvertTime(double seconds)
+    {
+        return string.Format(@"{0:mm\:ss\.f}", TimeSpan.FromSeconds(seconds));
+    }
+
+    private void TimeUPEvent(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        timeSEC += 0.1;
+        InvokeAsync(StateHasChanged);
+
+    }
+
+    private void TimeDOWNEvent(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        timeSEC -= 0.1;
+        @if (timeSEC <= 0)
+        {
+            timer.Stop();
+            isGameOver = true;
+            gameOverStyle = "pointer-events: none;";
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ResetGame()
+    {
+        timer.Stop();
+        isGameOver = false;
+        gameOverStyle = "pointer-events: none;";
+        StateHasChanged();
+
+        for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
+            {
+                if (flippedCardsMatrix[i, j])
+                {
+                    await JsRuntime.InvokeAsync<string>("flipback", i.ToString() + j.ToString());
                 }
             }
-            isfunctionrunning = false;
         }
+        await Task.Delay(500);
+
+        iconsPathMatrix = new string[settings.amount, settings.amount];
+        var random = new Random();
+        var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
+        int index = 0;
+
+        for (int i = 0; i < settings.amount; i++)
+        {
+            for (int j = 0; j < settings.amount; j++)
+            {
+                iconsPathMatrix[i, j] = "\\icons\\" + randomOrderOfNumbers[index] + ".svg";
+                index++;
+            }
+        }
+
+        timer = new System.Timers.Timer(100);
+
+        switch (settings.difficulty)
+        {
+            case 0:
+                timeSEC = 0;
+                timer.Elapsed += TimeUPEvent;
+                timer.Enabled = true;
+                break;
+            case 1:
+                switch (settings.amount)
+                {
+                    case 2:
+                        timeSEC = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        timeSEC = 40;
+                        difficultyTime = 40;
+                        break;
+                    case 6:
+                        timeSEC = 90;
+                        difficultyTime = 90;
+                        break;
+                    case 8:
+                        timeSEC = 160;
+                        difficultyTime = 160;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            case 2:
+                switch (settings.amount)
+                {
+                    case 2:
+                        timeSEC = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        timeSEC = 80;
+                        difficultyTime = 80;
+                        break;
+                    case 6:
+                        timeSEC = 180;
+                        difficultyTime = 180;
+                        break;
+                    case 8:
+                        timeSEC = 320;
+                        difficultyTime = 320;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            default:
+                break;
+        }
+
+        flippeCardPairIndex = new int[2, 2];
+        flippeCardPairIndex[0, 0] = -1;
+        flippeCardPairIndex[0, 1] = -1;
+        flippeCardPairIndex[1, 0] = -1;
+        flippeCardPairIndex[1, 1] = -1;
+        flippedCardsMatrix = new bool[settings.amount, settings.amount];
+        gameOverStyle = "";
+        timer.Start();
+        StateHasChanged();
+    }
+
+    private async Task FlipCard(string index, int i, int j)
+    {
+        if (!isFlipCardRunning)
+        {
+            isFlipCardRunning = true;
+
+            if (!flippedCardsMatrix[i, j])
+            {
+                if (flippeCardPairIndex[0, 0] == -1)            //if there is no
+                {
+                    await JsRuntime.InvokeAsync<string>("flip", index);
+                    flippedCardsMatrix[i, j] = true;
+                    flippeCardPairIndex[0, 0] = i;
+                    flippeCardPairIndex[0, 1] = j;
+                }
+                else                                          //if one card is flipped
+                {
+                    await JsRuntime.InvokeAsync<string>("flip", index);
+                    await Task.Delay(500);
+                    flippedCardsMatrix[i, j] = true;
+                    flippeCardPairIndex[1, 0] = i;
+                    flippeCardPairIndex[1, 1] = j;
+
+                    //if cards are different
+                    if (iconsPathMatrix[flippeCardPairIndex[0, 0], flippeCardPairIndex[0, 1]] != iconsPathMatrix[i, j])
+                    {
+
+                        //if difficulty is hard (then flipback all cards)
+                        if (settings.difficulty==2)
+                        {
+                            for (int k = 0; k < flippedCardsMatrix.GetLength(0); k++)
+                            {
+                                for (int l = 0; l < flippedCardsMatrix.GetLength(1); l++)
+                                {
+                                    if (flippedCardsMatrix[k, l])
+                                    {
+                                        flippedCardsMatrix[k, l] = false;
+                                        await JsRuntime.InvokeAsync<string>("flipback", k.ToString() + l.ToString());
+                                    }
+                                }
+                            }
+                            await Task.Delay(500);
+                        }
+                        //else flipback only last pair
+                        else                            
+                        {
+                            await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[0, 0].ToString() + flippeCardPairIndex[0, 1].ToString());
+                            await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[1, 0].ToString() + flippeCardPairIndex[1, 1].ToString());
+                            flippedCardsMatrix[i, j] = false;
+                            flippedCardsMatrix[flippeCardPairIndex[0, 0], flippeCardPairIndex[0, 1]] = false;
+                        }
+                    }
+                    //if two cards matches
+                    else
+                    {
+                        if (IsGameCompleted())
+                        {
+                            timer.Stop();
+                            var bestOldScore = await BrowserStorage.GetAsync<string>("Score_" + settings.amount+"_"+settings.difficulty);
+                            if (bestOldScore.Success)
+                            {
+                                //to convert to TimeSpan i need to add '0:' to string
+                                TimeSpan ts = TimeSpan.Parse("0:" + bestOldScore.Value);
+                                switch (settings.difficulty)
+                                {
+                                    case 0:
+                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(timeSEC)));
+                                        if (resultEasy == 1)
+                                        {
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
+                                            bestTime = ConvertTime(timeSEC);
+                                        }
+                                        break;
+                                    case 1:
+                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
+                                        if (resultNormal == 1)
+                                        {
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                            bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        }
+                                        break;
+                                    case 2:
+                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
+                                        if (resultHard == 1)
+                                        {
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                            bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                            }
+                            else
+                            {
+                                switch (settings.difficulty)
+                                {
+                                    case 0:
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
+                                        bestTime = ConvertTime(timeSEC);
+                                        break;
+                                    case 1:
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                        bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        break;
+                                    case 2:
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                        bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                            }
+                            StateHasChanged();
+                        }
+                    }
+
+                    flippeCardPairIndex[0, 0] = -1;
+                    flippeCardPairIndex[0, 1] = -1;
+                    flippeCardPairIndex[1, 0] = -1;
+                    flippeCardPairIndex[1, 1] = -1;
+                }
+            }
+
+            isFlipCardRunning = false;
+        }
+    }
+
+    private bool IsGameCompleted()
+    {
+        for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
+            {
+                if (!flippedCardsMatrix[i, j])
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

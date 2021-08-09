@@ -2,27 +2,30 @@
 @using Microsoft.AspNetCore.Hosting
 
 @inject IWebHostEnvironment env
+@inject Services.Settings settings
+@inject Services.ComponentsService componentsService
+
 @if (isMenuClosed)
 {
-    <GameComponent names="@names" />
+    <GameComponent names="@iconsPathMatrix"/>
 }
 else
 {
 
-    <div class="row start-menu" style="@style">
+    <div class="start-menu" style="@startMenuStyle">
         <div class="col-12 h-100 p-0">
             <div class="d-flex justify-content-center align-items-end" style="height:55%;">
-                <button @onclick="(() => createNames())" style="width: 50%; border-radius: 50%; outline: none; aspect-ratio: 1/1; background-color: #a9e4ae; border: 1px solid #676767; box-shadow: 0 0 14px -8px black; ">
-                    <i class="fas fa-play font-size-play" style="color: white; overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; max-height: 100%;"></i>
+                <button @onclick="(() => CreateOrderOfIcons())" class="play-button">
+                    <i class="fas fa-play font-size-play icon-style text-white"></i>
                 </button>
             </div>
             <div class="d-flex justify-content-center align-items-center" style="height:45%;">
-                <button @onclick='(()=> { style = "width:0;";style3 = "width:100%";  style2 = "visibility:visible;"; })' class="d-flex align-items-center" style="width: 75%; height: 40%; border-radius: 1rem; border: none; outline: none; background-color: #a9e4ae; border: 1px solid #676767; box-shadow: 0 0 14px -8px black; ">
-                    <div style="width:20%;" class="d-flex justify-content-end">
-                        <i class="fas fa-cog font-size-icon-sett" style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; max-height: 100%;"></i>
+                <button @onclick='(()=> { startMenuStyle = "width:0;";settingsAnimationStyle = "width:100%";  settingsMenuStyle = "visibility:visible;"; })' class="d-flex align-items-center settings-button">
+                    <div class="d-flex justify-content-end w-20">
+                        <i class="fas fa-cog font-size-icon-sett con-style"></i>
                     </div>
-                    <div style="width: 80%; font-family: cursive;" class="font-size-settings">
-                        <span style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+                    <div class="font-size-settings font-cursive w-80">
+                        <span class="font-settings">
                             SETTINGS
                         </span>
                     </div>
@@ -30,22 +33,22 @@ else
             </div>
         </div>
     </div>
-    <div class="settings-menu" style="@style2">
-        <div class="settings-anim" style="@style3">
-            <div class="d-flex w-100 justify-content-center" style="border-radius: 2rem 2rem 0 0; height: 12%; background-color: #597454; color: white;">
+    <div class="settings-menu" style="@settingsMenuStyle">
+        <div class="settings-anim" style="@settingsAnimationStyle">
+            <div class="d-flex w-100 justify-content-center text-white" style="border-radius: 2rem 2rem 0 0; height: 12%; background-color: #597454;">
                 <div class="d-flex justify-content-center align-items-center font-size-settings text-center" style="width:85%;">
-                    <span style="overflow: hidden; display: inline-block; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; font-family: cursive; margin-left: calc(((100%*100)/75)*0.125);">
+                    <span class="font-settings font-cursive" style="margin-left: calc(((100%*100)/75)*0.125);">
                         SETTINGS
                     </span>
                 </div>
-                <button @onclick='(()=> {test();})' class="h-100" style="width: 15%; background-color: #f16a6a; border-radius: 0rem 2rem 0 0; border: none; outline: none;color:white;">
+                <button @onclick='(()=> {CloseSettings();})' class="close-settings-button">
                     <i class="fas fa-times" style="font-size:1.5rem;"></i>
                 </button>
             </div>
             <div class="d-flex justify-content-center align-items-center flex-column" style="height:88%;">
-                <div style="height:15%;" class="d-flex justify-content-center align-items-center w-100">
-                    <EditForm Model="amount">
-                        <InputSelect @bind-Value="amount">
+                <div class="d-flex justify-content-center align-items-center w-100" style="height:15%;">
+                    <EditForm Model="settings.amount">
+                        <InputSelect @bind-Value="settings.amount">
                             <option value="2">2x2</option>
                             <option value="4">4x4</option>
                             <option value="6">6x6</option>
@@ -54,35 +57,35 @@ else
                     </EditForm>
                 </div>
                 <div style="height:70%;" class="d-flex justify-content-center w-100">
-                    <EditForm Model="difficulty" style="width:80%">
+                    <EditForm Model="settings.difficulty" class="w-80">
                         <div class="form-check w-100 p-0" style="height: 33%;">
-                            <label class="radio w-100 m-0" for="test1" style="height:90%;">
-                                <input type="radio" class="radio__input" id="test1" name="exampleRadios" />
+                            <label class="radio w-100 m-0" for="radio1" style="height:90%;">
+                                <input type="radio" class="radio__input" id="radio1" name="exampleRadios" value="0" @onchange="OnChangeInputRadio" checked="@("0".Equals(settings.difficulty.ToString()))"/>
                                 <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-green">
                                     <div class="d-flex w-100 flex-column" style="height:90%;">
                                         <div class="d-flex w-100" style="height:80%">
-                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                            <div class="d-flex justify-content-center align-items-center w-20">
                                                 <i class="fas fa-smile icon-size-diff"></i>
                                             </div>
-                                            <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
+                                            <div class="w-60 d-flex justify-content-center align-items-center font-cursive">
                                                 <span class="font-size-diff">
                                                     EASY
                                                 </span>
                                             </div>
-                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                            <div class="d-flex justify-content-center align-items-center w-20">
                                                 <i class="fas fa-smile  icon-size-diff"></i>
                                             </div>
                                         </div>
                                         <div class="d-flex w-100" style="height:20%">
-                                            <div style="width:20%;">
+                                            <div class="w-20">
 
                                             </div>
-                                            <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
+                                            <div style="font-size:0.75rem;" class="d-flex justify-content-center align-items-center w-60 font-cursive">
                                                 <span>
                                                     No pressure, just play :)
                                                 </span>
                                             </div>
-                                            <div style="width:20%;">
+                                            <div class="w-20">
 
                                             </div>
                                         </div>
@@ -91,33 +94,33 @@ else
                             </label>
                         </div>
                         <div class="form-check w-100 p-0" style="height:33%;">
-                            <label class="radio w-100 m-0" for="test2" style="height:90%;">
-                                <input type="radio" class="radio__input" id="test2" name="exampleRadios" checked />
+                            <label class="radio w-100 m-0" for="radio2" style="height:90%;">
+                                <input type="radio" class="radio__input" id="radio2" name="exampleRadios" value="1"  @onchange="OnChangeInputRadio" checked="@("1".Equals(settings.difficulty.ToString()))"/>
                                 <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-orange">
                                     <div class="d-flex w-100 flex-column" style="height:90%;">
                                         <div class="d-flex w-100" style="height:80%">
                                             <div style="width:20%;" class="d-flex justify-content-center align-items-center">
                                                 <i class="fas fa-stopwatch icon-size-diff" style="transform-origin: 50% 59%;"></i>
                                             </div>
-                                            <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
+                                            <div class="d-flex justify-content-center align-items-center w-60 font-cursive">
                                                 <span class="font-size-diff">
                                                     NORMAL
                                                 </span>
                                             </div>
-                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                            <div class="d-flex justify-content-center align-items-center w-20">
                                                 <i class="fas fa-stopwatch icon-size-diff" style="transform-origin: 50% 59%;"></i>
                                             </div>
                                         </div>
                                         <div class="d-flex w-100" style="height:20%">
-                                            <div style="width:20%;">
+                                            <div class="w-20">
 
                                             </div>
-                                            <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
+                                            <div style="font-size:0.75rem;" class="d-flex justify-content-center align-items-center font-cursive w-60">
                                                 <span>
                                                     Time Limit
                                                 </span>
                                             </div>
-                                            <div style="width:20%;">
+                                            <div class="w-20">
 
                                             </div>
                                         </div>
@@ -126,20 +129,20 @@ else
                             </label>
                         </div>
                         <div class="form-check w-100 p-0" style="height: 33%;">
-                            <label class="radio w-100 m-0" for="test3" style="height:90%;">
-                                <input type="radio" class="radio__input" id="test3" name="exampleRadios" />
+                            <label class="radio w-100 m-0" for="radio3" style="height:90%;">
+                                <input type="radio" class="radio__input" id="radio3" name="exampleRadios" value="2"  @onchange="OnChangeInputRadio" checked="@("2".Equals(settings.difficulty.ToString()))"/>
                                 <div class="radio_radio w-100 h-100 d-flex align-items-center bcg-red">
                                     <div class="d-flex w-100 flex-column" style="height:90%;">
                                         <div class="d-flex w-100" style="height:80%">
-                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                            <div class="d-flex justify-content-center align-items-center w-20">
                                                 <i class="fas fa-bomb icon-size-diff" style="transform-origin: 39.5% 58.3%;"></i>
                                             </div>
-                                            <div style="width: 60%; font-family: cursive;" class="d-flex justify-content-center align-items-center">
+                                            <div class="d-flex justify-content-center align-items-center font-cursive w-60">
                                                 <span class="font-size-diff">
                                                     HARD
                                                 </span>
                                             </div>
-                                            <div style="width:20%;" class="d-flex justify-content-center align-items-center">
+                                            <div class="d-flex justify-content-center align-items-center w-20">
                                                 <i class="fas fa-bomb icon-size-diff" style="transform-origin: 39.5% 58.3%;"></i>
                                             </div>
                                         </div>
@@ -147,12 +150,12 @@ else
                                             <div style="width:20%;">
 
                                             </div>
-                                            <div style="width: 60%; font-family: cursive; font-size:0.75rem;" class="d-flex justify-content-center align-items-center">
+                                            <div style="font-size:0.75rem;" class="d-flex justify-content-center align-items-center font-cursive w-60">
                                                 <span>
                                                     After mistake, reset elements
                                                 </span>
                                             </div>
-                                            <div style="width:20%;">
+                                            <div sclass="w-20">
 
                                             </div>
                                         </div>
@@ -168,43 +171,68 @@ else
 }
 
 @code {
-    private string style { get; set; }
-    private int amount = 6;
-    private string style2 { get; set; }
-    private string style3 { get; set; }
-    private int difficulty { get; set; }
-    private string[,] names { get; set; }
-
+    private string startMenuStyle { get; set; }
+    private string settingsMenuStyle { get; set; }
+    private string settingsAnimationStyle { get; set; }
     private bool isMenuClosed { get; set; }
+    private string[,] iconsPathMatrix { get; set; }
 
-    private async Task test()
+    protected override void OnInitialized()
     {
-        difficulty = 1;
-        style = "z-index:4;"; style3 = "";
-        await Task.Delay(900);
-        style2 = "visibility:hidden;";
+        componentsService.homePage = this;
+
+        //default game settings
+        settings.amount = 6;            //6x6
+        settings.difficulty = 1;        //Normal
     }
 
-    private void createNames()
+    private void OnChangeInputRadio(ChangeEventArgs args)
     {
+        settings.difficulty = Convert.ToInt32(args.Value.ToString());
+    }
 
-        names = new string[amount, amount];
-        var rnd = new Random();
-        var randomNumbers = Enumerable.Range(0, amount * amount).Select(x => x).Concat(Enumerable.Range(0, amount * amount).Select(x => x)).OrderBy(x => rnd.Next()).Take(amount * amount * 2).ToList();
+    private async Task CloseSettings()
+    {
+        //Menu on top
+        startMenuStyle = "z-index:4;";
+        //Remove width:100%
+        settingsAnimationStyle = "";
+        //Required to play animation
+        await Task.Delay(900);
+        //Hide settings
+        settingsMenuStyle = "visibility:hidden;";
+    }
 
+    private void CreateOrderOfIcons()
+    {
+        iconsPathMatrix = new string[settings.amount, settings.amount];
+        var random = new Random();
+
+        //Explanation: 
+        //If game is created with the size 4x4. That means there is 16 squares. In this 16 squares, we got 8 pairs. File (svg) names are from 0 to 31 (because max size of board is 8x8 => 64 => 32).
+        //Back to our example 4x4. We take Enumebable with indexes from 0 to 8 concat that with the same numbers, so we got 8 pairs and then just place them in the random order.
+        var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
+
+        //index to go through the list.
         int index = 0;
 
-
-        for (int i = 0; i < amount; i++)
+        //fill the matrix with icons paths.
+        for (int i = 0; i < settings.amount; i++)
         {
-            for (int j = 0; j < amount; j++)
+            for (int j = 0; j < settings.amount; j++)
             {
-                names[i, j] =env.WebRootPath+"\\icons\\"+ randomNumbers[index]+".svg";
+                iconsPathMatrix[i, j] ="\\icons\\"+ randomOrderOfNumbers[index]+".svg";
                 index++;
             }
         }
 
+        //After generate matrix show the game component.
         isMenuClosed = true;
     }
 
+    public void OpenMenu()
+    {
+        isMenuClosed = false;
+        StateHasChanged();
+    }
 }

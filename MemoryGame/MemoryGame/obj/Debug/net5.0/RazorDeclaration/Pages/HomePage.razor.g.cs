@@ -105,51 +105,78 @@ using Microsoft.AspNetCore.Hosting;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 170 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
+#line 173 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
        
-    private string style { get; set; }
-    private int amount = 6;
-    private string style2 { get; set; }
-    private string style3 { get; set; }
-    private int difficulty { get; set; }
-    private string[,] names { get; set; }
-
+    private string startMenuStyle { get; set; }
+    private string settingsMenuStyle { get; set; }
+    private string settingsAnimationStyle { get; set; }
     private bool isMenuClosed { get; set; }
+    private string[,] iconsPathMatrix { get; set; }
 
-    private async Task test()
+    protected override void OnInitialized()
     {
-        difficulty = 1;
-        style = "z-index:4;"; style3 = "";
-        await Task.Delay(900);
-        style2 = "visibility:hidden;";
+        componentsService.homePage = this;
+
+        //default game settings
+        settings.amount = 6;            //6x6
+        settings.difficulty = 1;        //Normal
     }
 
-    private void createNames()
+    private void OnChangeInputRadio(ChangeEventArgs args)
     {
+        settings.difficulty = Convert.ToInt32(args.Value.ToString());
+    }
 
-        names = new string[amount, amount];
-        var rnd = new Random();
-        var randomNumbers = Enumerable.Range(0, amount * amount).Select(x => x).Concat(Enumerable.Range(0, amount * amount).Select(x => x)).OrderBy(x => rnd.Next()).Take(amount * amount * 2).ToList();
+    private async Task CloseSettings()
+    {
+        //Menu on top
+        startMenuStyle = "z-index:4;";
+        //Remove width:100%
+        settingsAnimationStyle = "";
+        //Required to play animation
+        await Task.Delay(900);
+        //Hide settings
+        settingsMenuStyle = "visibility:hidden;";
+    }
 
+    private void CreateOrderOfIcons()
+    {
+        iconsPathMatrix = new string[settings.amount, settings.amount];
+        var random = new Random();
+
+        //Explanation: 
+        //If game is created with the size 4x4. That means there is 16 squares. In this 16 squares, we got 8 pairs. File (svg) names are from 0 to 31 (because max size of board is 8x8 => 64 => 32).
+        //Back to our example 4x4. We take Enumebable with indexes from 0 to 8 concat that with the same numbers, so we got 8 pairs and then just place them in the random order.
+        var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
+
+        //index to go through the list.
         int index = 0;
 
-
-        for (int i = 0; i < amount; i++)
+        //fill the matrix with icons paths.
+        for (int i = 0; i < settings.amount; i++)
         {
-            for (int j = 0; j < amount; j++)
+            for (int j = 0; j < settings.amount; j++)
             {
-                names[i, j] =env.WebRootPath+"\\icons\\"+ randomNumbers[index]+".svg";
+                iconsPathMatrix[i, j] ="\\icons\\"+ randomOrderOfNumbers[index]+".svg";
                 index++;
             }
         }
 
+        //After generate matrix show the game component.
         isMenuClosed = true;
     }
 
+    public void OpenMenu()
+    {
+        isMenuClosed = false;
+        StateHasChanged();
+    }
 
 #line default
 #line hidden
 #nullable disable
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private Services.ComponentsService componentsService { get; set; }
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private Services.Settings settings { get; set; }
         [global::Microsoft.AspNetCore.Components.InjectAttribute] private IWebHostEnvironment env { get; set; }
     }
 }

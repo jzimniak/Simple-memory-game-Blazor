@@ -96,6 +96,13 @@ using System.Globalization;
 #line default
 #line hidden
 #nullable disable
+#nullable restore
+#line 2 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
+#line default
+#line hidden
+#nullable disable
     public partial class GameComponent : Microsoft.AspNetCore.Components.ComponentBase
     {
         #pragma warning disable 1998
@@ -104,31 +111,252 @@ using System.Globalization;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 59 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+#line 82 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
        
-
-    private int amount { get; set; }
-    private bool[,] flipped { get; set; }
-    private int[,] flippedindex { get; set; }
-    private bool isfunctionrunning { get; set; }
     [Parameter]
     public string[,] names { get; set; }
 
-    protected override void OnInitialized()
+    private bool[,] flipped { get; set; }
+    private int[,] flippedindex { get; set; }
+    private bool isfunctionrunning { get; set; }
+    private System.Timers.Timer timer { get; set; }
+    private double test = 0;
+    private double difficultyTime { get; set; }
+    private string bestTime { get; set; }
+    private string styleGameOver { get; set; }
+    private bool gameover { get; set; }
+
+    protected async override Task OnInitializedAsync()
     {
-        flippedindex = new int[2,2];
+        componentsService.gameComponent = this;
+        var result = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
+        if (result.Success)
+        {
+            bestTime = result.Value;
+        }
+
+        timer = new System.Timers.Timer(100);
+        switch (settings.difficulty)
+        {
+            case 0:
+                timer.Elapsed += TimeUPEvent;
+                timer.Enabled = true;
+                break;
+            case 1:
+                switch (settings.amount)
+                {
+                    case 2:
+                        test = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        test = 40;
+                        difficultyTime = 40;
+                        break;
+                    case 6:
+                        test = 90;
+                        difficultyTime = 90;
+                        break;
+                    case 8:
+                        test = 160;
+                        difficultyTime = 160;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            case 2:
+                switch (settings.amount)
+                {
+                    case 2:
+                        test = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        test = 80;
+                        difficultyTime = 80;
+                        break;
+                    case 6:
+                        test = 180;
+                        difficultyTime = 180;
+                        break;
+                    case 8:
+                        test = 320;
+                        difficultyTime = 320;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            default:
+                break;
+        }
+
+        flippedindex = new int[2, 2];
         flippedindex[0, 0] = -1;
         flippedindex[0, 1] = -1;
         flippedindex[1, 0] = -1;
         flippedindex[1, 1] = -1;
-        amount = 2;
-        flipped = new bool[amount, amount];
+        flipped = new bool[settings.amount, settings.amount];
     }
-    private async Task flip(string index,int i , int j)
+
+    private string convertTime(double miliseconds)
+    {
+        TimeSpan t = TimeSpan.FromSeconds(miliseconds);
+
+        return string.Format(@"{0:mm\:ss\.f}", t);
+    }
+
+    private void TimeUPEvent(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        test += 0.1;
+        InvokeAsync(StateHasChanged);
+
+    }
+
+    private void TimeDOWNEvent(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        test -= 0.1;
+        
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 191 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+         if (test <= 0)
+        {
+            timer.Stop();
+            gameover = true;
+            styleGameOver = "pointer-events: none;";
+        }
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 196 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+         
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task resetGame()
+    {
+        timer.Stop();
+        gameover = false;
+        styleGameOver = "pointer-events: none;";
+        StateHasChanged();
+
+        for (int i = 0; i < flipped.GetLength(0); i++)
+        {
+            for (int j = 0; j < flipped.GetLength(1); j++)
+            {
+                if (flipped[i, j])
+                {
+                    await JsRuntime.InvokeAsync<string>("flipback", i.ToString() + j.ToString());
+                }
+            }
+        }
+        await Task.Delay(500);
+
+        names = new string[settings.amount, settings.amount];
+        var rnd = new Random();
+        var randomNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => rnd.Next()).Take(settings.amount * settings.amount).ToList();
+        int index = 0;
+
+        for (int i = 0; i < settings.amount; i++)
+        {
+            for (int j = 0; j < settings.amount; j++)
+            {
+                names[i, j] = "\\icons\\" + randomNumbers[index] + ".svg";
+                index++;
+            }
+        }
+
+        timer = new System.Timers.Timer(100);
+
+        switch (settings.difficulty)
+        {
+            case 0:
+                test = 0;
+                timer.Elapsed += TimeUPEvent;
+                timer.Enabled = true;
+                break;
+            case 1:
+                switch (settings.amount)
+                {
+                    case 2:
+                        test = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        test = 40;
+                        difficultyTime = 40;
+                        break;
+                    case 6:
+                        test = 90;
+                        difficultyTime = 90;
+                        break;
+                    case 8:
+                        test = 160;
+                        difficultyTime = 160;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            case 2:
+                switch (settings.amount)
+                {
+                    case 2:
+                        test = 10;
+                        difficultyTime = 10;
+                        break;
+                    case 4:
+                        test = 80;
+                        difficultyTime = 80;
+                        break;
+                    case 6:
+                        test = 180;
+                        difficultyTime = 180;
+                        break;
+                    case 8:
+                        test = 320;
+                        difficultyTime = 320;
+                        break;
+                    default:
+                        break;
+                }
+                timer.Elapsed += TimeDOWNEvent;
+                timer.Enabled = true;
+                break;
+            default:
+                break;
+        }
+
+        flippedindex = new int[2, 2];
+        flippedindex[0, 0] = -1;
+        flippedindex[0, 1] = -1;
+        flippedindex[1, 0] = -1;
+        flippedindex[1, 1] = -1;
+        flipped = new bool[settings.amount, settings.amount];
+        styleGameOver = "";
+        timer.Start();
+        StateHasChanged();
+    }
+
+    private async Task flip(string index, int i, int j)
     {
         if (!isfunctionrunning)
         {
             isfunctionrunning = true;
+
             if (!flipped[i, j])
             {
                 if (flippedindex[0, 0] == -1)
@@ -141,16 +369,98 @@ using System.Globalization;
                 else
                 {
                     await JsRuntime.InvokeAsync<string>("flip", index);
-                    System.Threading.Thread.Sleep(500);
+                    await Task.Delay(500);
                     flipped[i, j] = true;
                     flippedindex[1, 0] = i;
                     flippedindex[1, 1] = j;
-                    if (names[flippedindex[0, 0], flippedindex[0, 1]]!=names[i,j])
+                    if (names[flippedindex[0, 0], flippedindex[0, 1]] != names[i, j])
                     {
-                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[0, 0].ToString() + flippedindex[0, 1].ToString());
-                        await JsRuntime.InvokeAsync<string>("flipback", flippedindex[1, 0].ToString() + flippedindex[1, 1].ToString());
-                        flipped[i, j] = false;
-                        flipped[flippedindex[0, 0], flippedindex[0, 1]] = false;
+                        if (settings.difficulty==2)
+                        {
+                            for (int k = 0; k < flipped.GetLength(0); k++)
+                            {
+                                for (int l = 0; l < flipped.GetLength(1); l++)
+                                {
+                                    if (flipped[k, l])
+                                    {
+                                        flipped[k, l] = false;
+                                        await JsRuntime.InvokeAsync<string>("flipback", k.ToString() + l.ToString());
+                                    }
+                                }
+                            }
+                            await Task.Delay(500);
+                        }
+                        else
+                        {
+                            await JsRuntime.InvokeAsync<string>("flipback", flippedindex[0, 0].ToString() + flippedindex[0, 1].ToString());
+                            await JsRuntime.InvokeAsync<string>("flipback", flippedindex[1, 0].ToString() + flippedindex[1, 1].ToString());
+                            flipped[i, j] = false;
+                            flipped[flippedindex[0, 0], flippedindex[0, 1]] = false;
+                        }
+                    }
+                    else
+                    {
+                        if (gameCompleted())
+                        {
+                            timer.Stop();
+                            var result = await BrowserStorage.GetAsync<string>("Score_" + settings.amount+"_"+settings.difficulty);
+                            if (result.Success)
+                            {
+                                TimeSpan ts = TimeSpan.Parse("0:" + result.Value);
+                                switch (settings.difficulty)
+                                {
+                                    case 0:
+                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + convertTime(test)));
+                                        if (resultEasy == 1)
+                                        {
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(test));
+                                            bestTime = convertTime(test);
+                                        }
+                                        break;
+                                    case 1:
+                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + convertTime(difficultyTime - test)));
+                                        if (resultNormal == 1)
+                                        {
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
+                                            bestTime = convertTime(difficultyTime - test);
+                                        }
+                                        break;
+                                    case 2:
+                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + convertTime(difficultyTime - test)));
+                                        if (resultHard == 1)
+                                        {
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
+                                            bestTime = convertTime(difficultyTime - test);
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                            }
+                            else
+                            {
+                                switch (settings.difficulty)
+                                {
+                                    case 0:
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(test));
+                                        bestTime = convertTime(test);
+                                        break;
+                                    case 1:
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
+                                        bestTime = convertTime(difficultyTime - test);
+                                        break;
+                                    case 2:
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
+                                        bestTime = convertTime(difficultyTime - test);
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                            }
+                            StateHasChanged();
+                        }
                     }
 
                     flippedindex[0, 0] = -1;
@@ -159,13 +469,32 @@ using System.Globalization;
                     flippedindex[1, 1] = -1;
                 }
             }
+
             isfunctionrunning = false;
         }
+    }
+
+    private bool gameCompleted()
+    {
+        for (int i = 0; i < flipped.GetLength(0); i++)
+        {
+            for (int j = 0; j < flipped.GetLength(1); j++)
+            {
+                if (!flipped[i, j])
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 #line default
 #line hidden
 #nullable disable
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private Services.ComponentsService componentsService { get; set; }
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private Services.Settings settings { get; set; }
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private ProtectedLocalStorage BrowserStorage { get; set; }
         [global::Microsoft.AspNetCore.Components.InjectAttribute] private IJSRuntime JsRuntime { get; set; }
     }
 }
