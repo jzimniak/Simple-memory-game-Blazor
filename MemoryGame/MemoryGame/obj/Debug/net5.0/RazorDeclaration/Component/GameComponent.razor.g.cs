@@ -111,28 +111,32 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 82 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+#line 81 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
        
     [Parameter]
-    public string[,] names { get; set; }
+    public string[,] iconsPathMatrix { get; set; }
 
-    private bool[,] flipped { get; set; }
-    private int[,] flippedindex { get; set; }
-    private bool isfunctionrunning { get; set; }
-    private System.Timers.Timer timer { get; set; }
-    private double test = 0;
+    private bool isGameOver { get; set; }
+    private bool isFlipCardRunning { get; set; }
+
+    private bool[,] flippedCardsMatrix { get; set; }
+    private int[,] flippeCardPairIndex { get; set; }
+
+    private double timeSEC  = 0;
     private double difficultyTime { get; set; }
+
     private string bestTime { get; set; }
-    private string styleGameOver { get; set; }
-    private bool gameover { get; set; }
+    private string gameOverStyle { get; set; }
+
+    private System.Timers.Timer timer { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
         componentsService.gameComponent = this;
-        var result = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
-        if (result.Success)
+        var score = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
+        if (score.Success)
         {
-            bestTime = result.Value;
+            bestTime = score.Value;
         }
 
         timer = new System.Timers.Timer(100);
@@ -146,19 +150,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        test = 10;
+                        timeSEC = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        test = 40;
+                        timeSEC = 40;
                         difficultyTime = 40;
                         break;
                     case 6:
-                        test = 90;
+                        timeSEC = 90;
                         difficultyTime = 90;
                         break;
                     case 8:
-                        test = 160;
+                        timeSEC = 160;
                         difficultyTime = 160;
                         break;
                     default:
@@ -171,19 +175,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        test = 10;
+                        timeSEC = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        test = 80;
+                        timeSEC = 80;
                         difficultyTime = 80;
                         break;
                     case 6:
-                        test = 180;
+                        timeSEC = 180;
                         difficultyTime = 180;
                         break;
                     case 8:
-                        test = 320;
+                        timeSEC = 320;
                         difficultyTime = 320;
                         break;
                     default:
@@ -196,66 +200,64 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 break;
         }
 
-        flippedindex = new int[2, 2];
-        flippedindex[0, 0] = -1;
-        flippedindex[0, 1] = -1;
-        flippedindex[1, 0] = -1;
-        flippedindex[1, 1] = -1;
-        flipped = new bool[settings.amount, settings.amount];
+        flippeCardPairIndex = new int[2, 2];
+        flippeCardPairIndex[0, 0] = -1;
+        flippeCardPairIndex[0, 1] = -1;
+        flippeCardPairIndex[1, 0] = -1;
+        flippeCardPairIndex[1, 1] = -1;
+        flippedCardsMatrix = new bool[settings.amount, settings.amount];
     }
 
-    private string convertTime(double miliseconds)
+    private string ConvertTime(double seconds)
     {
-        TimeSpan t = TimeSpan.FromSeconds(miliseconds);
-
-        return string.Format(@"{0:mm\:ss\.f}", t);
+        return string.Format(@"{0:mm\:ss\.f}", TimeSpan.FromSeconds(seconds));
     }
 
     private void TimeUPEvent(Object source, System.Timers.ElapsedEventArgs e)
     {
-        test += 0.1;
+        timeSEC += 0.1;
         InvokeAsync(StateHasChanged);
 
     }
 
     private void TimeDOWNEvent(Object source, System.Timers.ElapsedEventArgs e)
     {
-        test -= 0.1;
+        timeSEC -= 0.1;
         
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 191 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
-         if (test <= 0)
+#line 192 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+         if (timeSEC <= 0)
         {
             timer.Stop();
-            gameover = true;
-            styleGameOver = "pointer-events: none;";
+            isGameOver = true;
+            gameOverStyle = "pointer-events: none;";
         }
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 196 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+#line 197 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
          
         InvokeAsync(StateHasChanged);
     }
 
-    private async Task resetGame()
+    private async Task ResetGame()
     {
         timer.Stop();
-        gameover = false;
-        styleGameOver = "pointer-events: none;";
+        isGameOver = false;
+        gameOverStyle = "pointer-events: none;";
         StateHasChanged();
 
-        for (int i = 0; i < flipped.GetLength(0); i++)
+        for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
         {
-            for (int j = 0; j < flipped.GetLength(1); j++)
+            for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
             {
-                if (flipped[i, j])
+                if (flippedCardsMatrix[i, j])
                 {
                     await JsRuntime.InvokeAsync<string>("flipback", i.ToString() + j.ToString());
                 }
@@ -263,16 +265,16 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
         }
         await Task.Delay(500);
 
-        names = new string[settings.amount, settings.amount];
-        var rnd = new Random();
-        var randomNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => rnd.Next()).Take(settings.amount * settings.amount).ToList();
+        iconsPathMatrix = new string[settings.amount, settings.amount];
+        var random = new Random();
+        var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
         int index = 0;
 
         for (int i = 0; i < settings.amount; i++)
         {
             for (int j = 0; j < settings.amount; j++)
             {
-                names[i, j] = "\\icons\\" + randomNumbers[index] + ".svg";
+                iconsPathMatrix[i, j] = "\\icons\\" + randomOrderOfNumbers[index] + ".svg";
                 index++;
             }
         }
@@ -282,7 +284,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
         switch (settings.difficulty)
         {
             case 0:
-                test = 0;
+                timeSEC = 0;
                 timer.Elapsed += TimeUPEvent;
                 timer.Enabled = true;
                 break;
@@ -290,19 +292,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        test = 10;
+                        timeSEC = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        test = 40;
+                        timeSEC = 40;
                         difficultyTime = 40;
                         break;
                     case 6:
-                        test = 90;
+                        timeSEC = 90;
                         difficultyTime = 90;
                         break;
                     case 8:
-                        test = 160;
+                        timeSEC = 160;
                         difficultyTime = 160;
                         break;
                     default:
@@ -315,19 +317,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        test = 10;
+                        timeSEC = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        test = 80;
+                        timeSEC = 80;
                         difficultyTime = 80;
                         break;
                     case 6:
-                        test = 180;
+                        timeSEC = 180;
                         difficultyTime = 180;
                         break;
                     case 8:
-                        test = 320;
+                        timeSEC = 320;
                         difficultyTime = 320;
                         break;
                     default:
@@ -340,97 +342,104 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 break;
         }
 
-        flippedindex = new int[2, 2];
-        flippedindex[0, 0] = -1;
-        flippedindex[0, 1] = -1;
-        flippedindex[1, 0] = -1;
-        flippedindex[1, 1] = -1;
-        flipped = new bool[settings.amount, settings.amount];
-        styleGameOver = "";
+        flippeCardPairIndex = new int[2, 2];
+        flippeCardPairIndex[0, 0] = -1;
+        flippeCardPairIndex[0, 1] = -1;
+        flippeCardPairIndex[1, 0] = -1;
+        flippeCardPairIndex[1, 1] = -1;
+        flippedCardsMatrix = new bool[settings.amount, settings.amount];
+        gameOverStyle = "";
         timer.Start();
         StateHasChanged();
     }
 
-    private async Task flip(string index, int i, int j)
+    private async Task FlipCard(string index, int i, int j)
     {
-        if (!isfunctionrunning)
+        if (!isFlipCardRunning)
         {
-            isfunctionrunning = true;
+            isFlipCardRunning = true;
 
-            if (!flipped[i, j])
+            if (!flippedCardsMatrix[i, j])
             {
-                if (flippedindex[0, 0] == -1)
+                if (flippeCardPairIndex[0, 0] == -1)            //if there is no
                 {
                     await JsRuntime.InvokeAsync<string>("flip", index);
-                    flipped[i, j] = true;
-                    flippedindex[0, 0] = i;
-                    flippedindex[0, 1] = j;
+                    flippedCardsMatrix[i, j] = true;
+                    flippeCardPairIndex[0, 0] = i;
+                    flippeCardPairIndex[0, 1] = j;
                 }
-                else
+                else                                          //if one card is flipped
                 {
                     await JsRuntime.InvokeAsync<string>("flip", index);
                     await Task.Delay(500);
-                    flipped[i, j] = true;
-                    flippedindex[1, 0] = i;
-                    flippedindex[1, 1] = j;
-                    if (names[flippedindex[0, 0], flippedindex[0, 1]] != names[i, j])
+                    flippedCardsMatrix[i, j] = true;
+                    flippeCardPairIndex[1, 0] = i;
+                    flippeCardPairIndex[1, 1] = j;
+
+                    //if cards are different
+                    if (iconsPathMatrix[flippeCardPairIndex[0, 0], flippeCardPairIndex[0, 1]] != iconsPathMatrix[i, j])
                     {
+
+                        //if difficulty is hard (then flipback all cards)
                         if (settings.difficulty==2)
                         {
-                            for (int k = 0; k < flipped.GetLength(0); k++)
+                            for (int k = 0; k < flippedCardsMatrix.GetLength(0); k++)
                             {
-                                for (int l = 0; l < flipped.GetLength(1); l++)
+                                for (int l = 0; l < flippedCardsMatrix.GetLength(1); l++)
                                 {
-                                    if (flipped[k, l])
+                                    if (flippedCardsMatrix[k, l])
                                     {
-                                        flipped[k, l] = false;
+                                        flippedCardsMatrix[k, l] = false;
                                         await JsRuntime.InvokeAsync<string>("flipback", k.ToString() + l.ToString());
                                     }
                                 }
                             }
                             await Task.Delay(500);
                         }
-                        else
+                        //else flipback only last pair
+                        else                            
                         {
-                            await JsRuntime.InvokeAsync<string>("flipback", flippedindex[0, 0].ToString() + flippedindex[0, 1].ToString());
-                            await JsRuntime.InvokeAsync<string>("flipback", flippedindex[1, 0].ToString() + flippedindex[1, 1].ToString());
-                            flipped[i, j] = false;
-                            flipped[flippedindex[0, 0], flippedindex[0, 1]] = false;
+                            await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[0, 0].ToString() + flippeCardPairIndex[0, 1].ToString());
+                            await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[1, 0].ToString() + flippeCardPairIndex[1, 1].ToString());
+                            flippedCardsMatrix[i, j] = false;
+                            flippedCardsMatrix[flippeCardPairIndex[0, 0], flippeCardPairIndex[0, 1]] = false;
                         }
                     }
+                    //if two cards matches
                     else
                     {
-                        if (gameCompleted())
+                        if (IsGameCompleted())
                         {
                             timer.Stop();
-                            var result = await BrowserStorage.GetAsync<string>("Score_" + settings.amount+"_"+settings.difficulty);
-                            if (result.Success)
+                            var bestOldScore = await BrowserStorage.GetAsync<string>("Score_" + settings.amount+"_"+settings.difficulty);
+                            if (bestOldScore.Success)
                             {
-                                TimeSpan ts = TimeSpan.Parse("0:" + result.Value);
+                                //to convert to TimeSpan i need to add '0:' to string
+                                TimeSpan ts = TimeSpan.Parse("0:" + bestOldScore.Value);
                                 switch (settings.difficulty)
                                 {
                                     case 0:
-                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + convertTime(test)));
+                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(timeSEC)));
                                         if (resultEasy == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(test));
-                                            bestTime = convertTime(test);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
+                                            bestTime = ConvertTime(timeSEC);
                                         }
                                         break;
                                     case 1:
-                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + convertTime(difficultyTime - test)));
+                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
                                         if (resultNormal == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
-                                            bestTime = convertTime(difficultyTime - test);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                            bestTime = ConvertTime(difficultyTime - timeSEC);
                                         }
                                         break;
                                     case 2:
-                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + convertTime(difficultyTime - test)));
+                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
                                         if (resultHard == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
-                                            bestTime = convertTime(difficultyTime - test);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                            bestTime = ConvertTime(difficultyTime - timeSEC);
                                         }
                                         break;
                                     default:
@@ -443,16 +452,16 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                                 switch (settings.difficulty)
                                 {
                                     case 0:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(test));
-                                        bestTime = convertTime(test);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
+                                        bestTime = ConvertTime(timeSEC);
                                         break;
                                     case 1:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
-                                        bestTime = convertTime(difficultyTime - test);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                        bestTime = ConvertTime(difficultyTime - timeSEC);
                                         break;
                                     case 2:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, convertTime(difficultyTime - test));
-                                        bestTime = convertTime(difficultyTime - test);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
+                                        bestTime = ConvertTime(difficultyTime - timeSEC);
                                         break;
                                     default:
                                         break;
@@ -463,24 +472,24 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                         }
                     }
 
-                    flippedindex[0, 0] = -1;
-                    flippedindex[0, 1] = -1;
-                    flippedindex[1, 0] = -1;
-                    flippedindex[1, 1] = -1;
+                    flippeCardPairIndex[0, 0] = -1;
+                    flippeCardPairIndex[0, 1] = -1;
+                    flippeCardPairIndex[1, 0] = -1;
+                    flippeCardPairIndex[1, 1] = -1;
                 }
             }
 
-            isfunctionrunning = false;
+            isFlipCardRunning = false;
         }
     }
 
-    private bool gameCompleted()
+    private bool IsGameCompleted()
     {
-        for (int i = 0; i < flipped.GetLength(0); i++)
+        for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
         {
-            for (int j = 0; j < flipped.GetLength(1); j++)
+            for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
             {
-                if (!flipped[i, j])
+                if (!flippedCardsMatrix[i, j])
                 {
                     return false;
                 }

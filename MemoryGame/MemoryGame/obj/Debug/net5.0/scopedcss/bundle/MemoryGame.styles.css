@@ -115,8 +115,35 @@
     border: 1px solid #676767;
     box-shadow: 0 0 14px -8px black;
 }
-.icon-style[b-l4g5sfkfl7] {
+.settings-button[b-l4g5sfkfl7] {
+    width: 75%;
+    height: 40%;
+    border-radius: 1rem;
+    border: none;
+    outline: none;
+    background-color: #a9e4ae;
+    border: 1px solid #676767;
+    box-shadow: 0 0 14px -8px black;
+    display:flex;
+    align-items:center;
+}
+.close-settings-button[b-l4g5sfkfl7] {
+    width: 15%;
+    background-color: #f16a6a;
+    border-radius: 0rem 2rem 0 0;
+    border: none;
+    outline: none;
     color: white;
+    height:100%;
+}
+.font-settings[b-l4g5sfkfl7] {
+    overflow: hidden;
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+.icon-style[b-l4g5sfkfl7] {
     overflow: hidden;
     display: inline-block;
     text-overflow: ellipsis;

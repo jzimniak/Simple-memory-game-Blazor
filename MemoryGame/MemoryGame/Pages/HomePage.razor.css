@@ -28,6 +28,8 @@
     background-color: #a9e4ae;
     border: 1px solid #676767;
     box-shadow: 0 0 14px -8px black;
+    display:flex;
+    align-items:center;
 }
 .close-settings-button {
     width: 15%;
