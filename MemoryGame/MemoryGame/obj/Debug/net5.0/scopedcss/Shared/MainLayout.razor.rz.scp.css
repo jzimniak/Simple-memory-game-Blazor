@@ -4,4 +4,31 @@
     flex-direction: column;
 }
 
+.bg[b-skpifezvmt] {
+    animation: slide-b-skpifezvmt 18s ease-in-out infinite alternate;
+    background-image: linear-gradient(-60deg, #cbffb2 50%, #97ddaa 50%);
+    bottom: 0;
+    left: -50%;
+    opacity: .5;
+    position: fixed;
+    right: -50%;
+    top: 0;
+    z-index: -1;
+}
+.bg2[b-skpifezvmt] {
+    animation-direction: alternate-reverse;
+    animation-duration: 12s;
+}
 
+.bg3[b-skpifezvmt] {
+    animation-duration: 30s;
+}
+@keyframes slide-b-skpifezvmt {
+    0% {
+        transform: translateX(-25%);
+    }
+
+    100% {
+        transform: translateX(25%);
+    }
+}

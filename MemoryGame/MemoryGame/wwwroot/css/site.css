@@ -14,6 +14,15 @@ html, body {
 .w-80{
     width:80%;
 }
+.h-10{
+    height:10%;
+}
+.h-55{
+    height:55%;
+}
+.h-45{
+    height:45%;
+}
 .font-cursive {
     font-family: cursive;
 }

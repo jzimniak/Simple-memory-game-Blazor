@@ -14,22 +14,25 @@ else
 
     <div class="start-menu" style="@startMenuStyle">
         <div class="col-12 h-100 p-0">
-            <div class="d-flex justify-content-center align-items-end" style="height:55%;">
+            <div class="d-flex justify-content-center align-items-end h-55">
                 <button @onclick="(() => CreateOrderOfIcons())" class="play-button">
                     <i class="fas fa-play font-size-play icon-style text-white"></i>
                 </button>
             </div>
-            <div class="d-flex justify-content-center align-items-center" style="height:45%;">
+            <div class="d-flex justify-content-center align-items-center flex-column h-45">
                 <button @onclick='(()=> { startMenuStyle = "width:0;";settingsAnimationStyle = "width:100%";  settingsMenuStyle = "visibility:visible;"; })' class="settings-button">
                     <div class="d-flex justify-content-end w-20">
                         <i class="fas fa-cog font-size-icon-sett con-style"></i>
                     </div>
-                    <div class="font-size-settings font-cursive w-80">
+                    <div class="font-size-settings font-cursive w-80 d-flex justify-content-center">
                         <span class="font-settings">
                             SETTINGS
                         </span>
                     </div>
                 </button>
+                <div class="mt-3 w-75 h-10">
+                    <div class="text-center font-size-flags-info">Flags made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+                </div>
             </div>
         </div>
     </div>
@@ -47,8 +50,8 @@ else
             </div>
             <div class="d-flex justify-content-center align-items-center flex-column" style="height:88%;">
                 <div class="d-flex justify-content-center align-items-center w-100" style="height:15%;">
-                    <EditForm Model="settings.amount">
-                        <InputSelect @bind-Value="settings.amount">
+                    <EditForm Model="settings.amount" style="width:20%;height:70%;">
+                        <InputSelect @bind-Value="settings.amount" style="width: 100%; height: 100%; border-radius: 10px; outline: none; cursor: pointer; ">
                             <option value="2">2x2</option>
                             <option value="4">4x4</option>
                             <option value="6">6x6</option>
@@ -152,7 +155,7 @@ else
                                             </div>
                                             <div style="font-size:0.75rem;" class="d-flex justify-content-center align-items-center font-cursive w-60">
                                                 <span>
-                                                    After mistake, reset elements
+                                                    No mistakes!
                                                 </span>
                                             </div>
                                             <div sclass="w-20">
@@ -211,7 +214,8 @@ else
         //Explanation: 
         //If game is created with the size 4x4. That means there is 16 squares. In this 16 squares, we got 8 pairs. File (svg) names are from 0 to 31 (because max size of board is 8x8 => 64 => 32).
         //Back to our example 4x4. We take Enumebable with indexes from 0 to 8 concat that with the same numbers, so we got 8 pairs and then just place them in the random order.
-        var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
+        var randomOrderOfNumbers = Enumerable.Range(0, 32).Select(x => x).OrderBy(x => random.Next()).Take(settings.amount*settings.amount/2).ToList();
+        randomOrderOfNumbers = randomOrderOfNumbers.Concat(randomOrderOfNumbers).OrderBy(x => random.Next()).ToList();
 
         //index to go through the list.
         int index = 0;
@@ -230,9 +234,13 @@ else
         isMenuClosed = true;
     }
 
-    public void OpenMenu()
+    public async Task OpenMenu()
     {
+        startMenuStyle = "width:5%;";
         isMenuClosed = false;
+        await Task.Delay(100);
+        StateHasChanged();
+        startMenuStyle = "";
         StateHasChanged();
     }
 }

@@ -111,7 +111,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 81 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+#line 115 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
        
     [Parameter]
     public string[,] iconsPathMatrix { get; set; }
@@ -122,16 +122,20 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
     private bool[,] flippedCardsMatrix { get; set; }
     private int[,] flippeCardPairIndex { get; set; }
 
-    private double timeSEC  = 0;
+    public double timeSECH { get { return Math.Round(this.timeSEC, 2); } set { this.timeSEC = value; } }
+    private double timeSEC;
     private double difficultyTime { get; set; }
 
     private string bestTime { get; set; }
     private string gameOverStyle { get; set; }
+    private string gameUpAnimation { get; set; }
+    private string gameResetAnimation { get; set; }
 
     private System.Timers.Timer timer { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
+        gameUpAnimation = "margin-top:-200vh;";
         componentsService.gameComponent = this;
         var score = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
         if (score.Success)
@@ -139,7 +143,11 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
             bestTime = score.Value;
         }
 
-        timer = new System.Timers.Timer(100);
+
+        gameUpAnimation = "";
+        StateHasChanged();
+        await Task.Delay(800);
+        timer = new System.Timers.Timer(10);
         switch (settings.difficulty)
         {
             case 0:
@@ -150,19 +158,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 40;
+                        timeSECH = 40;
                         difficultyTime = 40;
                         break;
                     case 6:
-                        timeSEC = 90;
+                        timeSECH = 90;
                         difficultyTime = 90;
                         break;
                     case 8:
-                        timeSEC = 160;
+                        timeSECH = 160;
                         difficultyTime = 160;
                         break;
                     default:
@@ -175,19 +183,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 80;
+                        timeSECH = 80;
                         difficultyTime = 80;
                         break;
                     case 6:
-                        timeSEC = 180;
+                        timeSECH = 180;
                         difficultyTime = 180;
                         break;
                     case 8:
-                        timeSEC = 320;
+                        timeSECH = 320;
                         difficultyTime = 320;
                         break;
                     default:
@@ -215,22 +223,22 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
     private void TimeUPEvent(Object source, System.Timers.ElapsedEventArgs e)
     {
-        timeSEC += 0.1;
+        timeSECH += 0.01;
         InvokeAsync(StateHasChanged);
 
     }
 
     private void TimeDOWNEvent(Object source, System.Timers.ElapsedEventArgs e)
     {
-        timeSEC -= 0.1;
+        timeSECH -= 0.01;
         
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
-#line 192 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
-         if (timeSEC <= 0)
+#line 234 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+         if (timeSECH <= 0)
         {
             timer.Stop();
             isGameOver = true;
@@ -241,7 +249,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 #line hidden
 #nullable disable
 #nullable restore
-#line 197 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
+#line 239 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Component\GameComponent.razor"
          
         InvokeAsync(StateHasChanged);
     }
@@ -253,18 +261,35 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
         gameOverStyle = "pointer-events: none;";
         StateHasChanged();
 
+        bool hastrue = false;
         for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
         {
             for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
             {
                 if (flippedCardsMatrix[i, j])
                 {
-                    await JsRuntime.InvokeAsync<string>("flipback", i.ToString() + j.ToString());
+                    hastrue = true;
+                    break;
                 }
             }
         }
-        await Task.Delay(500);
-
+        if (hastrue)
+        {
+            for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
+                {
+                    if (flippedCardsMatrix[i, j])
+                    {
+                        await JsRuntime.InvokeAsync<string>("flipback", i.ToString() + j.ToString());
+                    }
+                }
+            }
+            await Task.Delay(500);
+        }
+        gameResetAnimation = "transform: scale(0);";
+        StateHasChanged();
+        await Task.Delay(250);
         iconsPathMatrix = new string[settings.amount, settings.amount];
         var random = new Random();
         var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
@@ -278,13 +303,14 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 index++;
             }
         }
-
-        timer = new System.Timers.Timer(100);
+        gameResetAnimation = "";
+        await Task.Delay(250);
+        timer = new System.Timers.Timer(10);
 
         switch (settings.difficulty)
         {
             case 0:
-                timeSEC = 0;
+                timeSECH = 0;
                 timer.Elapsed += TimeUPEvent;
                 timer.Enabled = true;
                 break;
@@ -292,19 +318,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 40;
+                        timeSECH = 40;
                         difficultyTime = 40;
                         break;
                     case 6:
-                        timeSEC = 90;
+                        timeSECH = 90;
                         difficultyTime = 90;
                         break;
                     case 8:
-                        timeSEC = 160;
+                        timeSECH = 160;
                         difficultyTime = 160;
                         break;
                     default:
@@ -317,19 +343,19 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 80;
+                        timeSECH = 80;
                         difficultyTime = 80;
                         break;
                     case 6:
-                        timeSEC = 180;
+                        timeSECH = 180;
                         difficultyTime = 180;
                         break;
                     case 8:
-                        timeSEC = 320;
+                        timeSECH = 320;
                         difficultyTime = 320;
                         break;
                     default:
@@ -381,7 +407,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                     {
 
                         //if difficulty is hard (then flipback all cards)
-                        if (settings.difficulty==2)
+                        if (settings.difficulty == 2)
                         {
                             for (int k = 0; k < flippedCardsMatrix.GetLength(0); k++)
                             {
@@ -397,7 +423,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                             await Task.Delay(500);
                         }
                         //else flipback only last pair
-                        else                            
+                        else
                         {
                             await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[0, 0].ToString() + flippeCardPairIndex[0, 1].ToString());
                             await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[1, 0].ToString() + flippeCardPairIndex[1, 1].ToString());
@@ -411,7 +437,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                         if (IsGameCompleted())
                         {
                             timer.Stop();
-                            var bestOldScore = await BrowserStorage.GetAsync<string>("Score_" + settings.amount+"_"+settings.difficulty);
+                            var bestOldScore = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
                             if (bestOldScore.Success)
                             {
                                 //to convert to TimeSpan i need to add '0:' to string
@@ -419,27 +445,27 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                                 switch (settings.difficulty)
                                 {
                                     case 0:
-                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(timeSEC)));
+                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(timeSECH)));
                                         if (resultEasy == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
-                                            bestTime = ConvertTime(timeSEC);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSECH));
+                                            bestTime = ConvertTime(timeSECH);
                                         }
                                         break;
                                     case 1:
-                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
+                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSECH)));
                                         if (resultNormal == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                            bestTime = ConvertTime(difficultyTime - timeSEC);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                            bestTime = ConvertTime(difficultyTime - timeSECH);
                                         }
                                         break;
                                     case 2:
-                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
+                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSECH)));
                                         if (resultHard == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                            bestTime = ConvertTime(difficultyTime - timeSEC);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                            bestTime = ConvertTime(difficultyTime - timeSECH);
                                         }
                                         break;
                                     default:
@@ -452,16 +478,16 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
                                 switch (settings.difficulty)
                                 {
                                     case 0:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
-                                        bestTime = ConvertTime(timeSEC);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSECH));
+                                        bestTime = ConvertTime(timeSECH);
                                         break;
                                     case 1:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                        bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                        bestTime = ConvertTime(difficultyTime - timeSECH);
                                         break;
                                     case 2:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                        bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                        bestTime = ConvertTime(difficultyTime - timeSECH);
                                         break;
                                     default:
                                         break;
@@ -481,6 +507,14 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
             isFlipCardRunning = false;
         }
+    }
+
+    private async Task switchToSettings()
+    {
+
+        gameUpAnimation = "margin-top:-200vh;";
+        await Task.Delay(500);
+        await componentsService.homePage.OpenMenu();
     }
 
     private bool IsGameCompleted()

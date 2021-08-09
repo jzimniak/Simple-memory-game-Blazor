@@ -4,4 +4,31 @@
     flex-direction: column;
 }
 
+.bg { 
+    left: -50%;
+    opacity: .5;  
+    z-index: -1;
+    animation: slide 18s ease-in-out infinite alternate;
+    position: fixed;
+    right: -50%;
+    top: 0;
+    background-image: linear-gradient(-60deg, #cbffb2 50%, #97ddaa 50%);
+    bottom: 0; 
+}
+.bg2 {
+    animation-direction: alternate-reverse;
+    animation-duration: 12s;
+}
 
+.bg3 {
+    animation-duration: 30s;
+}
+@keyframes slide {
+    0% {
+        transform: translateX(-25%);
+    }
+
+    100% {
+        transform: translateX(25%);
+    }
+}

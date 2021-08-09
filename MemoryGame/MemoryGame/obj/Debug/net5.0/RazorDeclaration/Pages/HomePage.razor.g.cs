@@ -105,7 +105,7 @@ using Microsoft.AspNetCore.Hosting;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 173 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
+#line 176 "C:\Users\jarek\Documents\repos\simple-memory-game\MemoryGame\MemoryGame\Pages\HomePage.razor"
        
     private string startMenuStyle { get; set; }
     private string settingsMenuStyle { get; set; }
@@ -147,7 +147,8 @@ using Microsoft.AspNetCore.Hosting;
         //Explanation: 
         //If game is created with the size 4x4. That means there is 16 squares. In this 16 squares, we got 8 pairs. File (svg) names are from 0 to 31 (because max size of board is 8x8 => 64 => 32).
         //Back to our example 4x4. We take Enumebable with indexes from 0 to 8 concat that with the same numbers, so we got 8 pairs and then just place them in the random order.
-        var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
+        var randomOrderOfNumbers = Enumerable.Range(0, 32).Select(x => x).OrderBy(x => random.Next()).Take(settings.amount*settings.amount/2).ToList();
+        randomOrderOfNumbers = randomOrderOfNumbers.Concat(randomOrderOfNumbers).OrderBy(x => random.Next()).ToList();
 
         //index to go through the list.
         int index = 0;
@@ -166,9 +167,13 @@ using Microsoft.AspNetCore.Hosting;
         isMenuClosed = true;
     }
 
-    public void OpenMenu()
+    public async Task OpenMenu()
     {
+        startMenuStyle = "width:5%;";
         isMenuClosed = false;
+        await Task.Delay(100);
+        StateHasChanged();
+        startMenuStyle = "";
         StateHasChanged();
     }
 

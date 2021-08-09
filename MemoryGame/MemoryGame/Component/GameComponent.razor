@@ -6,31 +6,55 @@
 @inject Services.Settings settings
 @inject Services.ComponentsService componentsService
 
-<div class="game">
-    <div style="width:100vw;" class="d-flex justify-content-center">
+<div class="game" style="@gameUpAnimation">
+    <div style="width: 100vw; background-color: #ffffff54;" class="d-flex justify-content-center">
         <div class="top-menu-game d-flex flex-row">
-            <div class="h-100 d-flex justify-content-center align-items-center w-60">
+            <div class="h-100 d-flex justify-content-center align-items-center w-50">
                 @if (bestTime is not null)
                 {
-                    <span style="font-size: 2rem;" class="font-cursive">
-                        Personal best time: @bestTime
+                    <span style="color: #356d39;" class="font-cursive font-best-time">
+                        Best Time: @bestTime
                     </span>
                 }
                 else
                 {
-                    <span style="font-size: 1.7rem;" class="font-cursive">
-                        Complete the game to have personal best
-                    </span>
+                <span style="font-size: 1.7rem; color: #356d39;" class="font-cursive">
+                    Best Time: N/A
+                </span>               
                 }
             </div>
+            <div class="h-100 d-flex flex-column" style="width:10%">
+                <div class="w-100" style="height: 33%; display: flex; justify-content: center; align-items: center;">
+                    <span class="font-cursive font-mode-size">
+                        MODE
+                    </span>
+                </div>
+                <div class="w-100" style="height: 66%; display: flex; justify-content: center; align-items: center;">
+                    @switch (settings.difficulty)
+                    {
+                        case 0:
+                            <i class="fas fa-smile icon-mode-size" style=" color: #64c367;"></i>
+                            break;
+                        case 1:
+                            <i class="fas fa-stopwatch icon-mode-size" style="color: #fab855;"></i>
+                            break;
+
+                        case 2:
+                            <i class="fas fa-bomb icon-mode-size" style=" color:#f46666;"></i>
+                            break;
+                        default:
+                            break;
+                    }
+                </div>
+            </div>
             <div class="h-100 d-flex justify-content-center align-items-center w-20">
-                <button class="w-100 h-100 bg-transparent " style="outline:none;" @onclick="ResetGame">
-                    <i class="fas fa-redo-alt" style=" font-size: 2.5rem;"></i>
+                <button class="button-reset" style="border-right: 1px solid #9bcfa0;" @onclick="ResetGame">
+                    <i class="fas fa-redo-alt rotate-reset" style=" font-size: 2.5rem; color: #356d39;"></i>
                 </button>
             </div>
             <div class="h-100 d-flex justify-content-center align-items-center w-20">
-                <button class="w-100 h-100 bg-transparent" style="outline:none;" @onclick="(() => { componentsService.homePage.OpenMenu(); })">
-                    <i class="fas fa-cog font-size-icon-sett" style=" font-size: 2.5rem;"></i>
+                <button class="button-reset" @onclick='(() => { switchToSettings(); })'>
+                    <i class="fas fa-cog font-size-icon-sett rotate-settings" style=" font-size: 2.5rem; color: #356d39;"></i>
                 </button>
             </div>
         </div>
@@ -45,12 +69,22 @@
             }
             else
             {
-                <span style="font-size: 3rem;" class="font-cursive">
-                    @ConvertTime(timeSEC)
-                </span>
+                <div>
+                    <span style="font-size: 3rem;" class="font-cursive">
+                        @ConvertTime(timeSEC)
+                    </span>
+                        @if (settings.difficulty!=0)
+                        {
+                            <span>
+                                (@ConvertTime(difficultyTime- timeSEC))
+                            </span>
+                        }
+                </div>
+                
             }
         </div>
-        <div class="d-flex w-100 flex-column" style="aspect-ratio: 1/1;@gameOverStyle">
+        @{ var protectFromTooEarlyClick = (flippedCardsMatrix is null) ? "pointer-events: none;" : ""; }
+        <div class="d-flex w-100 flex-column" style="transition: transform 250ms ease; aspect-ratio: 1/1; @gameOverStyle @gameResetAnimation @protectFromTooEarlyClick">
             @for (int i = 0; i < settings.amount; i++)
             {
                 var percentage = ((decimal)100 / settings.amount).ToString(CultureInfo.InvariantCulture);
@@ -62,12 +96,12 @@
                         var index = i.ToString() + j.ToString();
                         var idFront = "front" + index;
                         var idBack = "back" + index;
-                        <div class="d-flex h-100 justify-content-center align-items-center t" style="width:@percentage%; perspective:1000px">
+                        <div class="d-flex h-100 justify-content-center align-items-center t" style="width:@percentage%; perspective:2500px">
                             <div id="@idFront" class="front" style="width: 93%;" @onclick='(() => FlipCard(index,iLocal,jLocal))'>
                             </div>
                             <div id="@idBack" class="back d-flex justify-content-center align-items-center" style="width: 93%;">
                                 @{var path = iconsPathMatrix[i, j]; }
-                                <img src="@path" style="max-height:80%;max-width:80%;" />
+                                <img src="@path" style="max-height: 80%; max-width: 80%; " />
                             </div>
                         </div>
                     }
@@ -88,16 +122,20 @@
     private bool[,] flippedCardsMatrix { get; set; }
     private int[,] flippeCardPairIndex { get; set; }
 
-    private double timeSEC  = 0;
+    public double timeSECH { get { return Math.Round(this.timeSEC, 2); } set { this.timeSEC = value; } }
+    private double timeSEC;
     private double difficultyTime { get; set; }
 
     private string bestTime { get; set; }
     private string gameOverStyle { get; set; }
+    private string gameUpAnimation { get; set; }
+    private string gameResetAnimation { get; set; }
 
     private System.Timers.Timer timer { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
+        gameUpAnimation = "margin-top:-200vh;";
         componentsService.gameComponent = this;
         var score = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
         if (score.Success)
@@ -105,7 +143,11 @@
             bestTime = score.Value;
         }
 
-        timer = new System.Timers.Timer(100);
+
+        gameUpAnimation = "";
+        StateHasChanged();
+        await Task.Delay(800);
+        timer = new System.Timers.Timer(10);
         switch (settings.difficulty)
         {
             case 0:
@@ -116,19 +158,19 @@
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 40;
+                        timeSECH = 40;
                         difficultyTime = 40;
                         break;
                     case 6:
-                        timeSEC = 90;
+                        timeSECH = 90;
                         difficultyTime = 90;
                         break;
                     case 8:
-                        timeSEC = 160;
+                        timeSECH = 160;
                         difficultyTime = 160;
                         break;
                     default:
@@ -141,19 +183,19 @@
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 80;
+                        timeSECH = 80;
                         difficultyTime = 80;
                         break;
                     case 6:
-                        timeSEC = 180;
+                        timeSECH = 180;
                         difficultyTime = 180;
                         break;
                     case 8:
-                        timeSEC = 320;
+                        timeSECH = 320;
                         difficultyTime = 320;
                         break;
                     default:
@@ -181,15 +223,15 @@
 
     private void TimeUPEvent(Object source, System.Timers.ElapsedEventArgs e)
     {
-        timeSEC += 0.1;
+        timeSECH += 0.01;
         InvokeAsync(StateHasChanged);
 
     }
 
     private void TimeDOWNEvent(Object source, System.Timers.ElapsedEventArgs e)
     {
-        timeSEC -= 0.1;
-        @if (timeSEC <= 0)
+        timeSECH -= 0.01;
+        @if (timeSECH <= 0)
         {
             timer.Stop();
             isGameOver = true;
@@ -205,18 +247,35 @@
         gameOverStyle = "pointer-events: none;";
         StateHasChanged();
 
+        bool hastrue = false;
         for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
         {
             for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
             {
                 if (flippedCardsMatrix[i, j])
                 {
-                    await JsRuntime.InvokeAsync<string>("flipback", i.ToString() + j.ToString());
+                    hastrue = true;
+                    break;
                 }
             }
         }
-        await Task.Delay(500);
-
+        if (hastrue)
+        {
+            for (int i = 0; i < flippedCardsMatrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < flippedCardsMatrix.GetLength(1); j++)
+                {
+                    if (flippedCardsMatrix[i, j])
+                    {
+                        await JsRuntime.InvokeAsync<string>("flipback", i.ToString() + j.ToString());
+                    }
+                }
+            }
+            await Task.Delay(500);
+        }
+        gameResetAnimation = "transform: scale(0);";
+        StateHasChanged();
+        await Task.Delay(250);
         iconsPathMatrix = new string[settings.amount, settings.amount];
         var random = new Random();
         var randomOrderOfNumbers = Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x).Concat(Enumerable.Range(0, settings.amount * settings.amount / 2).Select(x => x)).OrderBy(x => random.Next()).Take(settings.amount * settings.amount).ToList();
@@ -230,13 +289,14 @@
                 index++;
             }
         }
-
-        timer = new System.Timers.Timer(100);
+        gameResetAnimation = "";
+        await Task.Delay(250);
+        timer = new System.Timers.Timer(10);
 
         switch (settings.difficulty)
         {
             case 0:
-                timeSEC = 0;
+                timeSECH = 0;
                 timer.Elapsed += TimeUPEvent;
                 timer.Enabled = true;
                 break;
@@ -244,19 +304,19 @@
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 40;
+                        timeSECH = 40;
                         difficultyTime = 40;
                         break;
                     case 6:
-                        timeSEC = 90;
+                        timeSECH = 90;
                         difficultyTime = 90;
                         break;
                     case 8:
-                        timeSEC = 160;
+                        timeSECH = 160;
                         difficultyTime = 160;
                         break;
                     default:
@@ -269,19 +329,19 @@
                 switch (settings.amount)
                 {
                     case 2:
-                        timeSEC = 10;
+                        timeSECH = 10;
                         difficultyTime = 10;
                         break;
                     case 4:
-                        timeSEC = 80;
+                        timeSECH = 80;
                         difficultyTime = 80;
                         break;
                     case 6:
-                        timeSEC = 180;
+                        timeSECH = 180;
                         difficultyTime = 180;
                         break;
                     case 8:
-                        timeSEC = 320;
+                        timeSECH = 320;
                         difficultyTime = 320;
                         break;
                     default:
@@ -333,7 +393,7 @@
                     {
 
                         //if difficulty is hard (then flipback all cards)
-                        if (settings.difficulty==2)
+                        if (settings.difficulty == 2)
                         {
                             for (int k = 0; k < flippedCardsMatrix.GetLength(0); k++)
                             {
@@ -349,7 +409,7 @@
                             await Task.Delay(500);
                         }
                         //else flipback only last pair
-                        else                            
+                        else
                         {
                             await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[0, 0].ToString() + flippeCardPairIndex[0, 1].ToString());
                             await JsRuntime.InvokeAsync<string>("flipback", flippeCardPairIndex[1, 0].ToString() + flippeCardPairIndex[1, 1].ToString());
@@ -363,7 +423,7 @@
                         if (IsGameCompleted())
                         {
                             timer.Stop();
-                            var bestOldScore = await BrowserStorage.GetAsync<string>("Score_" + settings.amount+"_"+settings.difficulty);
+                            var bestOldScore = await BrowserStorage.GetAsync<string>("Score_" + settings.amount + "_" + settings.difficulty);
                             if (bestOldScore.Success)
                             {
                                 //to convert to TimeSpan i need to add '0:' to string
@@ -371,27 +431,27 @@
                                 switch (settings.difficulty)
                                 {
                                     case 0:
-                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(timeSEC)));
+                                        int resultEasy = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(timeSECH)));
                                         if (resultEasy == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
-                                            bestTime = ConvertTime(timeSEC);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSECH));
+                                            bestTime = ConvertTime(timeSECH);
                                         }
                                         break;
                                     case 1:
-                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
+                                        int resultNormal = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSECH)));
                                         if (resultNormal == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                            bestTime = ConvertTime(difficultyTime - timeSEC);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                            bestTime = ConvertTime(difficultyTime - timeSECH);
                                         }
                                         break;
                                     case 2:
-                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSEC)));
+                                        int resultHard = TimeSpan.Compare(ts, TimeSpan.Parse("0:" + ConvertTime(difficultyTime - timeSECH)));
                                         if (resultHard == 1)
                                         {
-                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                            bestTime = ConvertTime(difficultyTime - timeSEC);
+                                            await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                            bestTime = ConvertTime(difficultyTime - timeSECH);
                                         }
                                         break;
                                     default:
@@ -404,16 +464,16 @@
                                 switch (settings.difficulty)
                                 {
                                     case 0:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSEC));
-                                        bestTime = ConvertTime(timeSEC);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(timeSECH));
+                                        bestTime = ConvertTime(timeSECH);
                                         break;
                                     case 1:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                        bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                        bestTime = ConvertTime(difficultyTime - timeSECH);
                                         break;
                                     case 2:
-                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSEC));
-                                        bestTime = ConvertTime(difficultyTime - timeSEC);
+                                        await BrowserStorage.SetAsync("Score_" + settings.amount + "_" + settings.difficulty, ConvertTime(difficultyTime - timeSECH));
+                                        bestTime = ConvertTime(difficultyTime - timeSECH);
                                         break;
                                     default:
                                         break;
@@ -433,6 +493,14 @@
 
             isFlipCardRunning = false;
         }
+    }
+
+    private async Task switchToSettings()
+    {
+
+        gameUpAnimation = "margin-top:-200vh;";
+        await Task.Delay(500);
+        await componentsService.homePage.OpenMenu();
     }
 
     private bool IsGameCompleted()

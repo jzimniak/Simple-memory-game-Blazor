@@ -30,6 +30,7 @@
     box-shadow: 0 0 14px -8px black;
     display:flex;
     align-items:center;
+    margin-top:1rem;
 }
 .close-settings-button[b-l4g5sfkfl7] {
     width: 15%;
@@ -105,6 +106,10 @@
 .bcg-orange[b-l4g5sfkfl7] {
     background-color: #fab855;
 }
+.font-size-flags-info[b-l4g5sfkfl7]{
+    font-size:0.75rem;
+}
+
 
 .radio__input[b-l4g5sfkfl7] {
     display: none;
@@ -128,6 +133,9 @@
 @media screen and (max-width: 425px) {
         .start-menu[b-l4g5sfkfl7] {
         width: 90%;
+    }
+    .font-size-flags-info[b-l4g5sfkfl7] {
+        font-size: 0.6rem;
     }
     .settings-menu[b-l4g5sfkfl7] {
         width: 90%;

@@ -30,6 +30,7 @@
     box-shadow: 0 0 14px -8px black;
     display:flex;
     align-items:center;
+    margin-top:1rem;
 }
 .close-settings-button {
     width: 15%;
@@ -105,6 +106,10 @@
 .bcg-orange {
     background-color: #fab855;
 }
+.font-size-flags-info{
+    font-size:0.75rem;
+}
+
 
 .radio__input {
     display: none;
@@ -128,6 +133,9 @@
 @media screen and (max-width: 425px) {
         .start-menu {
         width: 90%;
+    }
+    .font-size-flags-info {
+        font-size: 0.6rem;
     }
     .settings-menu {
         width: 90%;
