@@ -1,6 +1,6 @@
 # Memory game
 
-Memory game is simply game created with .Net Core 5 (Blazor)
+Memory game is simply game (with responsive web design) created with .Net Core 5 (Blazor)
 
 ## Requirements
 - Visual Studio with .Net Core 5
